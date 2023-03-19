@@ -99,8 +99,10 @@ void WindowManager::pre_render()
 	auto dock_id_rigt_menu = ImGui::DockBuilderSplitNode(m_dock_id, ImGuiDir_Right,
 		0.3f, nullptr, &dock_id_left_menu);
 
+	ImGuiID dock_id_middle;
+
 	auto dock_id_left = ImGui::DockBuilderSplitNode(dock_id_left_menu, ImGuiDir_Left,
-		0.2f, nullptr, &dock_id_left_menu);
+		0.2f, nullptr, &dock_id_middle);
 
 	ImGui::DockBuilderDockWindow("Dear ImGui Demo", dock_id_left);
 	ImGui::DockBuilderDockWindow("Zort", dock_id_rigt_menu);
@@ -150,10 +152,10 @@ void WindowManager::render()
 	{
 		if (ImGui::BeginMenu("View"))
 		{
-			/*for (auto& pair : m_registeredWindows)
+			for (auto& pair : m_registeredWindows)
 			{
-				ImGui::Checkbox(pair.second.first->get_window_name().c_str(), &pair.second.second);
-			}*/
+				ImGui::Checkbox(pair.second.second->get_name().c_str(), &pair.second.first);
+			}
 
 			ImGui::EndMenu();
 		}
@@ -185,7 +187,7 @@ void WindowManager::render()
 
 	for (auto& window : m_registeredWindows)
 	{
-		if (window.second.second->need_render())
+		if (window.second.first && window.second.second->need_render())
 		{
 			if (ImGui::Begin(window.second.second->get_name().c_str()))
 			{
