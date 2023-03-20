@@ -138,7 +138,7 @@ public:
 	_F_INLINE_ T* new_custom_object(Args... args)
 	{
 		void* ptr = mi_malloc(sizeof(T));
-		return new (ptr) T(&args...);
+		return new (ptr) T(args...);
 	}
 
 	template<typename T>
