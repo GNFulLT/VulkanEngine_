@@ -9,6 +9,8 @@ file(GLOB VulkanEngine_MANAGER_SRC
 	"manager/window_manager.cpp"
 	"manager/rendering/render_device.h"
 	"manager/rendering/render_device.cpp"
+	"manager/rendering/render_scene.h"
+	"manager/rendering/render_scene.cpp"
 	"manager/rendering/render_imgui.h"
 	"manager/rendering/render_imgui.cpp"
 
