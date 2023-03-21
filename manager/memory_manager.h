@@ -37,7 +37,7 @@ struct MemoryObjectMetaInfo
 	
 struct MemorySingletonMetaInfo
 {
-	char name[OBJECT_NAME_MAX_LEN];
+	StringName name;
 	size_t mem_size;
 };
 
@@ -53,8 +53,8 @@ public:
 		// Register itself to mem_map
 		auto inf = static_cast<MemorySingletonMetaInfo*>(m_singleton_info_mem.malloc());
 		inf->mem_size = sizeof(MemoryManager);
-		strcpy_s(inf->name, "MemoryManager");
-		m_singleton_mem_map.emplace(hash_string(inf->name),this);
+		inf->name.set_str("MemoryManager");
+		m_singleton_mem_map.emplace(hash_string(inf->name.c_str()),this);
 		m_singleton_meta_inf_map.emplace(this, inf);
 		m_allocated_blocks.insert(this);
 	}
@@ -63,7 +63,10 @@ public:
 	{
 		int a = 5;
 		std::cout << "Deleted";
-
+		if (m_allocated_blocks.size() != 0)
+		{
+			std::cout << "There is a thing that is not destroyed";
+		}
 	/*	m_singleton_info_mem.release_memory();
 
 		m_singleton_info_mem.purge_memory();*/
@@ -93,7 +96,6 @@ public:
 	template<object_type Obj, typename... Args>
 	_IMP_RETURN_ _INLINE_ Obj* new_object(const String& name, Args... args)
 	{
-		static auto generator = boost::uuids::random_generator();
 		if (m_object_mem_map.find(hash_string(name)) != m_object_mem_map.end())
 			return nullptr;
 		void* ptr = mi_malloc(sizeof(Obj));
@@ -116,12 +118,27 @@ public:
 		return (Obj*)oPtr;
 	}
 
-	
+	template<object_type Obj, typename... Args>
+	_F_INLINE_ Obj* create_singleton_object(const String& class_name,Args... args)
+	{
+		if (m_object_mem_map.find(hash_string(class_name)) != m_object_mem_map.end())
+			return nullptr;
+
+		Object* object = (Object*)new_object<Obj>(class_name, args...);
+		auto info = (MemorySingletonMetaInfo*)m_singleton_info_mem.malloc();
+		info->mem_size = sizeof(Obj);
+		info->name.set_str(object->get_memory_name());
+		m_singleton_meta_inf_map.emplace(object, info);
+		m_singleton_mem_map.emplace(hash_string(String(info->name.c_str())), object);
+		return (Obj*)object;	
+	}
+
 	template<object_type Obj>
 	_INLINE_ void destroy_object(Obj* ptr)
 	{
-		assert(m_allocated_blocks.find(ptr) != m_allocated_blocks.end());
-		assert(m_object_name_map.find(ptr) != m_object_name_map.end());
+		// X TODO : NEED HANDLE
+		/*assert(m_allocated_blocks.find(ptr) != m_allocated_blocks.end());
+		assert(m_object_name_map.find(ptr) != m_object_name_map.end());*/
 
 		g_object_meta_info_mem::free(m_object_meta_inf_map[ptr]);
 		m_object_meta_inf_map.erase(ptr);
@@ -134,19 +151,24 @@ public:
 		
 	}
 
-	template<typename T,typename... Args>
+	template<object_type Obj>
+	_F_INLINE_ void destroy_singleton_object(Obj* ptr)
+	{
+		m_singleton_mem_map.erase(hash_string(((Object*)ptr)->get_memory_name()));
+		auto info = m_singleton_meta_inf_map[(void*)ptr];
+		m_singleton_info_mem.free(info);
+		m_singleton_meta_inf_map.erase((void*)ptr);
+		destroy_object<Obj>(ptr);
+		
+	}
+	/*template<object_type T,typename... Args>
 	_F_INLINE_ T* new_custom_object(Args... args)
 	{
 		void* ptr = mi_malloc(sizeof(T));
 		return new (ptr) T(args...);
 	}
 
-	template<typename T>
-	_F_INLINE_ void delete_custom_object(T* ptr)
-	{
-		ptr->~T();
-		mi_free(ptr);
-	}
+	*/
 
 	template<typename T, typename std::enable_if<!std::is_enum<T>::value, int>::type = 0>
 	_F_INLINE_ Argument* create_argument(T initialVal);
@@ -291,8 +313,16 @@ private:
 	boost::pool<> m_size_t_double_mem = boost::pool<>(sizeof(size_t));
 	boost::pool<> m_singleton_info_mem = boost::pool<>(sizeof(MemorySingletonMetaInfo));
 	boost::pool<> m_arg_mem = boost::pool<>(sizeof(Argument));
+	
+	template<object_type T>
+	_F_INLINE_ void delete_custom_object(T* ptr)
+	{
+		ptr->~T();
+		mi_free(ptr);
+	}
 
-
+	_INLINE_ static boost::uuids::random_generator generator = boost::uuids::random_generator();
+	
 	template<TrivialConstructable T>
 	_F_INLINE_ static T* alloc_trivial_ctor()
 	{

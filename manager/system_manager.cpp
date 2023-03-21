@@ -6,7 +6,7 @@
 void SystemManager::destroy()
 {
 	
-	MemoryManager::get_singleton()->delete_custom_object(this);
+	MemoryManager::get_singleton()->destroy_singleton_object(this);
 	
 }
 

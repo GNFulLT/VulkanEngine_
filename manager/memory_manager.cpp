@@ -7,7 +7,7 @@ bool operator==(const MemoryObjectMetaInfo& lhs, const MemoryObjectMetaInfo& rhs
 
 bool operator==(const MemorySingletonMetaInfo& lhs, const MemorySingletonMetaInfo& rhs)
 {
-	return (strcmp(lhs.name, rhs.name) == 0) && lhs.mem_size == rhs.mem_size;
+	return (strcmp(lhs.name.c_str(), rhs.name.c_str()) == 0) && lhs.mem_size == rhs.mem_size;
 }
 
 namespace std {
@@ -26,7 +26,7 @@ namespace std {
 	{
 		std::size_t operator()(const MemorySingletonMetaInfo& k) const
 		{
-			return hash_string(k.name);
+			return hash_string(k.name.c_str());
 		}
 	};
 }
