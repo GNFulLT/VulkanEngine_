@@ -44,14 +44,14 @@ public:
 	void on_resize(int width, int height);
 	void on_iconify_changed(int iconified);
 	
-	template<window_type T>
-	bool create_window(String name,T** ppWindow)
+	template<window_type T,typename... Args>
+	bool create_window(String name,T** ppWindow,Args... args)
 	{
 		if (m_createdWindows.find(name) != m_createdWindows.end())
 		{
 			return false;
 		}
-		auto pWindow = MemoryManager::get_singleton()->new_object<T>(name, name);
+		auto pWindow = MemoryManager::get_singleton()->new_object<T>(name, name,args...);
 		m_createdWindows.emplace(name, pWindow);
 		*ppWindow = pWindow;
 		return true;
@@ -70,6 +70,7 @@ public:
 	_INLINE_ bool register_window(Window* window)
 	{
 		m_registeredWindows.emplace(window->get_name(),std::pair(true,window));
+		m_registeredWindowsList.push_back(window);
 		return true;
 	}
 
@@ -112,6 +113,7 @@ private:
 	ConfigProperty<WINDOW_MODE> m_windowMode;
 	WINDOW_MODE m_lastMode;
 private:
+	std::vector<Window*> m_registeredWindowsList;
 	std::unordered_map<String,Window*> m_createdWindows;
 	std::unordered_map<String,std::pair<bool,Window*>> m_registeredWindows;
 	unsigned int m_dock_id;

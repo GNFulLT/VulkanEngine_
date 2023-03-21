@@ -3,6 +3,11 @@
 #include "memory_manager.h"
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_internal.h"
+#include "rendering/render_device.h"
+#include "logger_manager.h"
+#include "rendering/render_scene.h"
+#include <boost/format.hpp>
+
 WindowManager::WindowManager() : m_lastMode(WINDOW_MODE_WINDOWED), m_windowMode(this, WindowManager::WINDOW_MODE_WINDOWED, "WindowMode"), m_size(this, GNF_UVec2(640, 480), "Size")
 {
 	m_dock_id = 0;
@@ -106,6 +111,7 @@ void WindowManager::pre_render()
 
 	ImGui::DockBuilderDockWindow("Dear ImGui Demo", dock_id_left);
 	ImGui::DockBuilderDockWindow("Zort", dock_id_rigt_menu);
+	ImGui::DockBuilderDockWindow("Scene", dock_id_middle);
 
 
 	if (ImGui::BeginMainMenuBar())
@@ -222,10 +228,21 @@ void WindowManager::on_created()
 
 
 	ImGui::End();
+	
+	auto iterator = m_registeredWindowsList.begin();
 
-	for (auto& window : m_registeredWindows)
+	while (iterator != m_registeredWindowsList.end())
 	{
-		window.second.second->on_created();
+		bool created = (*iterator.operator->())->on_created();
+		if (!created)
+		{
+			LoggerManager::get_singleton()->log_cout(this, boost::str(boost::format("Detach %1 Window because it couldn't be created") % (*iterator.operator->())->get_name()).c_str(),Logger::WARNING);
+			iterator = m_registeredWindowsList.erase(iterator);
+		}
+		else
+		{
+			iterator++;
+		}
 	}
 }
 
