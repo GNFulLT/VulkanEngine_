@@ -8,7 +8,7 @@ void Window::pre_render()
 	this->m_size.set(GNF_UVec2(size.x,size.y));
 }
 
-void Window::on_created()
+bool Window::on_created()
 {
-
+	return true;
 }

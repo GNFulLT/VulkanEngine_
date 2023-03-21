@@ -47,7 +47,7 @@ public:
 public:
 	virtual void render() = 0;
 	virtual void pre_render();
-	virtual void on_created();
+	virtual bool on_created();
 
 protected:
 	ConfigProperty<GNF_UVec2> m_size;

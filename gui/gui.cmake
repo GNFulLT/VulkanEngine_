@@ -5,5 +5,8 @@ file(GLOB VulkanEngine_GUI_SRC
 	"gui/windows/debug_window.cpp"
 	"gui/windows/text_editor_window.h"
 	"gui/windows/text_editor_window.cpp"
+	"gui/windows/scene_window.h"
+	"gui/windows/scene_window.cpp"
+
 
 )

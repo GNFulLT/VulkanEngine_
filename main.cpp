@@ -8,6 +8,7 @@
 
 #include "gui/windows/debug_window.h"
 #include "gui/windows/text_editor_window.h"
+#include "gui/windows/scene_window.h"
 
 #include <stack>
 
@@ -18,11 +19,13 @@ WindowManager* window_manager;
 RenderDevice* render_device;
 int main()
 {
+    mi_stats_reset();  // ignore earlier allocations
+
     std::stack<SystemManager*> manager_stack;
 
     memory_manager = MemoryManager::create_singleton();
 
-    logger_manager = memory_manager->new_custom_object<LoggerManager>();
+    logger_manager = memory_manager->create_singleton_object<LoggerManager>("LoggerManager");
 
     logger_manager->set_log_level_cout(Logger::DEBUG);
 
@@ -32,7 +35,7 @@ int main()
 
     manager_stack.push(logger_manager);
     
-    thread_pool_manager = memory_manager->new_custom_object<ThreadPoolManager>();
+    thread_pool_manager = memory_manager->create_singleton_object<ThreadPoolManager>("ThreadPoolManager");
 
     thread_pool_manager->init();
 
@@ -40,7 +43,7 @@ int main()
 
     manager_stack.push(thread_pool_manager);
 
-    window_manager = memory_manager->new_custom_object<WindowManager>();
+    window_manager = memory_manager->create_singleton_object<WindowManager>("WindowManager");
 
     manager_stack.push(window_manager);
 
@@ -48,7 +51,7 @@ int main()
     
     WindowManager::set_singleton(window_manager);
 
-    render_device = memory_manager->new_custom_object<RenderDevice>();
+    render_device = memory_manager->create_singleton_object<RenderDevice>("RenderDevice");
 
     RenderDevice::set_singleton(render_device);
 
@@ -90,10 +93,14 @@ int main()
             });
 
         TextEditorWindow* window;
+        SceneWindow* scene_window;
 
         window_manager->create_window("Zort",&window);
         window_manager->register_window(window);
         window->set_file_to_edit("./text_edit.glsl");
+        
+        window_manager->create_window("Scene", &scene_window, memory_manager->new_object<RenderScene>("SceneRenderer"));
+        window_manager->register_window(scene_window);
 
         //auto langDef = TextEditor::LanguageDefinition::GLSL();
         //window->SetLanguageDefinition(langDef);
@@ -145,5 +152,10 @@ int main()
         top->destroy();
         manager_stack.pop();
     }
+
+
+    memory_manager->destroy();
+    mi_stats_print(NULL);
+
     return 0;
 }
