@@ -67,6 +67,74 @@ struct SwapChainSupportDetails {
 	std::vector<VkPresentModeKHR> presentModes;
 };
 
+struct VulkanTexture {
+	VkImage image;
+	VkDeviceMemory imageMemory;
+	VkImageView imageView;
+};
+
+
+
+_F_INLINE_ uint32_t find_memory_type(VkPhysicalDevice device, uint32_t typeFilter, VkMemoryPropertyFlags properties)
+{
+
+	VkPhysicalDeviceMemoryProperties memProperties;
+	vkGetPhysicalDeviceMemoryProperties(device, &memProperties);
+
+	for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+		if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+			return i;
+		}
+	}
+
+	return (uint32_t)-1;
+}
+
+
+_INLINE_ bool create_image_view(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView* imageView, VkImageViewType viewType, uint32_t layerCount, uint32_t mipLevels)
+{
+	const VkImageViewCreateInfo viewInfo =
+	{
+		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.pNext = nullptr,
+		.flags = 0,
+		.image = image,
+		.viewType = viewType,
+		.format = format,
+		.subresourceRange =
+		{
+			.aspectMask = aspectFlags,
+			.baseMipLevel = 0,
+			.levelCount = mipLevels,
+			.baseArrayLayer = 0,
+			.layerCount = layerCount
+		}
+	};
+
+	return (vkCreateImageView(device, &viewInfo, nullptr, imageView) == VK_SUCCESS);
+}
+
+
+
+_INLINE_ bool create_image(VkDevice device, VkPhysicalDevice physicalDevice, uint32_t width, uint32_t height,
+	VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
+{
+	const VkImageCreateInfo imageInfo = { .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,    .pNext = nullptr,    .flags = 0,    .imageType = VK_IMAGE_TYPE_2D,    .format = format,    .extent = VkExtent3D           {.width = width, .height = height,.depth = 1},    .mipLevels = 1,    .arrayLayers = 1,    .samples = VK_SAMPLE_COUNT_1_BIT,    .tiling = tiling,    .usage = usage,    .sharingMode = VK_SHARING_MODE_EXCLUSIVE,    .queueFamilyIndexCount = 0,    .pQueueFamilyIndices = nullptr,    .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED };
+	if (vkCreateImage(device, &imageInfo, nullptr, &image) != VK_SUCCESS)
+		return false;
+	VkMemoryRequirements memRequirements;
+	vkGetImageMemoryRequirements(device, image, &memRequirements);
+	const VkMemoryAllocateInfo ai = { .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,    .pNext = nullptr,    .allocationSize = memRequirements.size,    .memoryTypeIndex = find_memory_type(physicalDevice,      memRequirements.memoryTypeBits, properties) };
+	if (vkAllocateMemory(device, &ai, nullptr, &imageMemory) != VK_SUCCESS)
+	{
+		// Destroy created Image
+		vkDestroyImage(device, image, nullptr);
+		return false;
+	}
+	vkBindImageMemory(device, image, imageMemory, 0);
+	return true;
+}
+
 _IMP_RETURN_ _F_INLINE_ bool get_all_instance_layers(std::vector<VkLayerProperties>& layerProps)
 {
 	uint32_t layer_count = 0;
