@@ -8,7 +8,7 @@
 
 #include "../../core/object/object.h"
 #include "../../core/utils_vulkan.h"
-
+#include "../../config/config_property.h"
 #define IMPLICIT_EXTENSIONS_NAME "ENGINE_EXS"
 
 
@@ -25,13 +25,14 @@
 
 class CreationServer;
 class ImGuiDraw;
+
 class RenderDevice : public SystemManager
 {
 	SINGLETON(RenderDevice)
 	OBJECT_DEF(RenderDevice, SystemManager)
 
 public:
-	RenderDevice() = default;
+	RenderDevice();
 	struct EnabledProps final
 	{
 		std::vector<VkLayerProperties> enabledLayers;
@@ -53,14 +54,14 @@ public:
 
 	struct VulkanPhysicalDevice final
 	{
-		VkPhysicalDevice physicalDev;
+		VkPhysicalDevice physicalDev = nullptr;
 		VkPhysicalDeviceFeatures physicalDevFeatures;
 		VkPhysicalDeviceProperties physicalDevProperties;
 	};
 
 	struct VulkanSwapChain final
 	{
-		VkSwapchainKHR swapchain;
+		VkSwapchainKHR swapchain = nullptr;
 
 		//X This is images created with swapchain
 		std::vector<VkImage> swapchainImages;
@@ -71,9 +72,9 @@ public:
 		//X This is to make able imageview be targeted as a frame buffer by presentation
 		std::vector<VkFramebuffer> frameBuffers;
 
-		VkFramebuffer currentFrameBuffer;
+		VkFramebuffer currentFrameBuffer = nullptr;
 
-		VkRenderPass renderPass;
+		VkRenderPass renderPass = nullptr;
 	};
 
 	struct VulkanRenderDevice final
@@ -83,14 +84,14 @@ public:
 
 		int mainQueueFamilyIndex;
 		int mainQueueIndex;
-		VkQueue mainQueue;
+		VkQueue mainQueue = nullptr;
 
 		int presentQueueFamilyIndex;
 		int presentQueueIndex;
-		VkQueue presentQueue;
+		VkQueue presentQueue = nullptr;
 
 
-		VkDevice logicalDevice;
+		VkDevice logicalDevice = nullptr;
 		EnabledProps enabledProps;
 
 
@@ -98,21 +99,21 @@ public:
 
 		std::vector<VkCommandPool> mainQueueCommandPools;
 
-		VkCommandBuffer pMainCommandBuffer;
+		VkCommandBuffer pMainCommandBuffer = nullptr;
 
 		std::unordered_map<unsigned int, std::vector<VkCommandBuffer>> commandBuffers;
 
 
-		VkCommandPool presentCommandPool;
-		VkCommandBuffer presentCommandBuffer;
+		VkCommandPool presentCommandPool = nullptr;
+		VkCommandBuffer presentCommandBuffer = nullptr;
 
 		//! Sync
-		VkSemaphore renderCompleteSemaphore;
-		VkSemaphore imageAcquiredSemaphore;
+		VkSemaphore renderCompleteSemaphore = nullptr;
+		VkSemaphore imageAcquiredSemaphore = nullptr;
 
 
-		VkFence	mainQueueFinishedFence;
-		VkFence presentQueueFinishedFence;
+		VkFence	mainQueueFinishedFence = nullptr;
+		VkFence presentQueueFinishedFence = nullptr;
 	};
 
 	~RenderDevice();
@@ -146,9 +147,14 @@ public:
 
 	void render2();
 	bool render_things(tf::Subflow& subflow);
-	_INLINE_ VkCommandBuffer get_main_cmd()
+	_INLINE_ VkCommandBuffer get_main_cmd() const noexcept
 	{
 		return m_renderDevice.pMainCommandBuffer;
+	}
+
+	_INLINE_ VulkanInstance get_instance() const noexcept
+	{
+		return m_instance;
 	}
 
 	_INLINE_ VkCommandBuffer get_cmd(int poolIndex, int cmdIndex)
@@ -199,6 +205,11 @@ public:
 		submitInfo.pCommandBuffers = buffs;
 
 		return &submitInfo;
+	}
+
+	_F_INLINE_ ConfigProperty<bool>* get_quitting()
+	{
+		return &m_quitting;
 	}
 
 	_INLINE_ VkRenderPassBeginInfo* get_main_renderpass_begin_inf()
@@ -257,8 +268,12 @@ private:
 	{
 		vkResetCommandPool(m_renderDevice.logicalDevice, m_renderDevice.mainQueueCommandPools[index], 0);
 	}
+
+
 	ImGuiDraw* imguiDraw;
 	bool m_canContinue = true;
+
+	ConfigProperty<bool> m_quitting;
 private:
 	friend class CreationServer;
 	friend class ImGuiDraw;

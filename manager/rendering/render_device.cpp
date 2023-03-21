@@ -63,14 +63,16 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugReportCallback
 	return VK_FALSE;
 }
 
-
+RenderDevice::RenderDevice() : m_quitting(this,false,"IsQuitting")
+{
+}
 
 RenderDevice::~RenderDevice()
 {
 	if (m_instanceLoaded && m_instance.instance != nullptr)
 	{
-
-		MemoryManager::get_singleton()->delete_custom_object(imguiDraw);
+		m_quitting.set(true);
+		MemoryManager::get_singleton()->destroy_object(imguiDraw);
 
 		vkDestroyFence(m_renderDevice.logicalDevice, m_renderDevice.mainQueueFinishedFence, nullptr);
 		vkDestroyFence(m_renderDevice.logicalDevice, m_renderDevice.presentQueueFinishedFence, nullptr);
@@ -156,8 +158,11 @@ bool RenderDevice::init()
 	if (!succeeded)
 		return false;
 	init_command_buffers();
-	imguiDraw = MemoryManager::get_singleton()->new_custom_object<ImGuiDraw>();
+	imguiDraw = MemoryManager::get_singleton()->new_object<ImGuiDraw>("ImGuiRenderer");
 	imguiDraw->init();
+
+	//m_renderScene = MemoryManager::get_singleton()->new_object<RenderScene>("SceneRenderer", m_renderDevice.logicalDevice,m_renderDevice.physicalDev.physicalDev);
+
 	init_subs();
 	return true;
 }
@@ -489,6 +494,7 @@ void RenderDevice::beginFrame()
 
 void RenderDevice::on_created()
 {
+	//X TODO : Calculate to size of the Window that will present the RenderDevice
 	ImGui_ImplGlfw_NewFrame();
 	ImGui_ImplVulkan_NewFrame();
 	ImGui::NewFrame();
@@ -496,6 +502,25 @@ void RenderDevice::on_created()
 	WindowManager::get_singleton()->on_created();
 
 	ImGui::EndFrame();
+
+	// In here give it to RenderDevice
+	// For now it is same size with swapchain
+	GNF_UVec2 size;
+	size.x = m_instance.surfaceExtent.width;
+	size.y = m_instance.surfaceExtent.height;
+
+	vkResetCommandPool(m_renderDevice.logicalDevice, m_renderDevice.mainQueueCommandPools[0], 0);
+
+
+	// Fence created as signaled so turn off
+	/*vkResetFences(m_renderDevice.logicalDevice, 1, &m_renderDevice.mainQueueFinishedFence);
+
+	m_renderScene->render_ex(m_renderDevice.mainQueue, m_renderDevice.pMainCommandBuffer, m_renderDevice.mainQueueFinishedFence);
+
+	vkWaitForFences(m_renderDevice.logicalDevice, 1, &m_renderDevice.mainQueueFinishedFence, true, UINT64_MAX);
+
+	vkResetCommandPool(m_renderDevice.logicalDevice, m_renderDevice.mainQueueCommandPools[0], 0);*/
+
 }
 
 void RenderDevice::pre_render()
