@@ -6,13 +6,14 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-
+#include "../../core/object/object.h"
 #include "../../imgui/imgui.h"
 #include "../../imgui/imgui_impl_glfw.h"
 #include "../../imgui/imgui_impl_vulkan.h"
 
-class ImGuiDraw
+class ImGuiDraw : public Object
 {
+	OBJECT_DEF(ImGuiDraw,Object)
 public:
 	ImGuiDraw();
 	~ImGuiDraw();
