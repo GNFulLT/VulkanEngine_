@@ -25,7 +25,7 @@
 #include "../../imgui/imgui.h"
 #include "../../imgui/imgui_impl_glfw.h"
 #include "../../imgui/imgui_impl_vulkan.h"
-
+#include "../../gui/windows/scene_window.h"
 #include <cmath>
 #include <boost/bind/bind.hpp>
 
@@ -513,13 +513,13 @@ void RenderDevice::on_created()
 
 
 	// Fence created as signaled so turn off
-	/*vkResetFences(m_renderDevice.logicalDevice, 1, &m_renderDevice.mainQueueFinishedFence);
+	vkResetFences(m_renderDevice.logicalDevice, 1, &m_renderDevice.mainQueueFinishedFence);
 
-	m_renderScene->render_ex(m_renderDevice.mainQueue, m_renderDevice.pMainCommandBuffer, m_renderDevice.mainQueueFinishedFence);
+	((SceneWindow*)(WindowManager::get_singleton()->get_registered_window("Scene")))->render_ex(m_renderDevice.mainQueue, m_renderDevice.pMainCommandBuffer, m_renderDevice.mainQueueFinishedFence);
 
 	vkWaitForFences(m_renderDevice.logicalDevice, 1, &m_renderDevice.mainQueueFinishedFence, true, UINT64_MAX);
 
-	vkResetCommandPool(m_renderDevice.logicalDevice, m_renderDevice.mainQueueCommandPools[0], 0);*/
+	vkResetCommandPool(m_renderDevice.logicalDevice, m_renderDevice.mainQueueCommandPools[0], 0);
 
 }
 

@@ -66,6 +66,10 @@ public:
 		MemoryManager::get_singleton()->destroy_object<T>(ptr);
 	}
 
+	_INLINE_ Window* get_registered_window(const String& str)
+	{
+		return m_registeredWindows.find(str).operator->()->second.second;
+	}
 	
 	_INLINE_ bool register_window(Window* window)
 	{

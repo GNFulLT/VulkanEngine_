@@ -14,9 +14,11 @@ public:
 public:
 	void render() override;
 	bool on_created() override;
+	void render_ex(VkQueue queue, VkCommandBuffer buff, VkFence fence);
 
 private:
 	void on_device_destroyed(const bool& quitting);
+
 	boost::signals2::connection m_quittingConnection;
 private:
 	RenderScene* p_render_scene;
