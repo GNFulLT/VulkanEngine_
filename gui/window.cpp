@@ -2,6 +2,11 @@
 
 #include "../imgui/imgui.h"
 
+void Window::on_size_changed()
+{
+	
+}
+
 void Window::pre_render()
 {
 	auto size = ImGui::GetWindowSize();

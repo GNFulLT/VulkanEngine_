@@ -12,10 +12,12 @@ public:
 	SceneWindow(String name, RenderScene* pRenderScene);
 	~SceneWindow();
 public:
-	void render() override;
-	bool on_created() override;
+	void render() override final;
+	bool on_created() override final;
 	void render_ex(VkQueue queue, VkCommandBuffer buff, VkFence fence);
-	void pre_render() override;
+	void pre_render() override final;
+
+	void on_size_changed() override final;
 private:
 	void on_device_destroyed(const bool& quitting);
 

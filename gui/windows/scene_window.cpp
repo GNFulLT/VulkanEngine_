@@ -13,10 +13,7 @@ SceneWindow::SceneWindow(String name, RenderScene* pRenderScene) : Window(name),
 
 void SceneWindow::render()
 {
-
-	auto size = ImGui::GetContentRegionAvail();
-	m_size.set(GNF_UVec2(size.x, size.y));
-	ImGui::Image(p_render_scene->get_image(),ImVec2(1920,1080));
+	ImGui::Image(p_render_scene->get_image(),ImVec2(m_size.get()->x, m_size.get()->y));
 }
 
 bool SceneWindow::on_created()
@@ -33,6 +30,12 @@ void SceneWindow::pre_render()
 {
 	auto size = ImGui::GetContentRegionAvail();
 	m_size.set(GNF_UVec2(size.x,size.y));
+}
+
+void SceneWindow::on_size_changed()
+{
+	auto size = ImGui::GetContentRegionAvail();
+	m_size.set(GNF_UVec2(size.x, size.y));
 }
 
 void SceneWindow::render_ex(VkQueue queue,VkCommandBuffer buff,VkFence fence)

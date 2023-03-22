@@ -21,7 +21,7 @@ class WindowManager : public SystemManager
 	OBJECT_DEF(WindowManager, SystemManager)
 public:
 	WindowManager();
-
+	bool layout_changed = false;
 	void destroy() override;
 	void rebuild_window();
 	enum WINDOW_MODE

@@ -180,6 +180,7 @@ void WindowManager::render()
 			for (auto& pair : m_registeredWindows)
 			{
 				ImGui::Checkbox(pair.second.second->get_name().c_str(), &pair.second.first);
+			
 			}
 
 			ImGui::EndMenu();
@@ -216,7 +217,14 @@ void WindowManager::render()
 		{
 			if (ImGui::Begin(window.second.second->get_name().c_str()))
 			{
-				window.second.second->render();
+				if (window.second.second->check_size_changed())
+				{
+					window.second.second->on_size_changed();
+				}
+				else
+				{
+					window.second.second->render();
+				}
 				ImGui::End();
 			}
 		}
@@ -289,7 +297,10 @@ void WindowManager::on_created()
 
 void WindowManager::on_resize(int width,int height)
 {
-	m_size.set(GNF_UVec2(width, height));
+	GNF_UVec2 vec;
+	vec.x = width;
+	vec.y = height;
+	m_size.set(vec);
 }
 
 bool WindowManager::need_render()

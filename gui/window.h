@@ -5,7 +5,7 @@
 
 #include "../core/object/object.h"
 #include "../config/config_property.h"
-
+#include "../imgui/imgui.h"
 class WindowManager;
 
 
@@ -18,6 +18,15 @@ public:
 		m_windowName = name;
 	}
 
+	virtual void on_size_changed();
+
+	_INLINE_ bool check_size_changed() const noexcept
+	{
+		auto size = ImGui::GetContentRegionAvail();
+		if (size.x == m_size.get()->x && size.y == m_size.get()->y)
+			return false;
+		return true;
+	}
 
 	_INLINE_ const GNF_UVec2* get_size_r() const noexcept
 	{

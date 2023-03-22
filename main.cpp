@@ -142,16 +142,16 @@ int main()
 
 
                 }
-                else
-                {
-                    render_device->beginFrameW();
+                
+                render_device->beginFrameW();
 
-                    thread_pool_manager->run_flow(renderTask).wait();
+                thread_pool_manager->run_flow(renderTask).wait();
 
-                    render_device->fill_and_execute_cmd();
 
-                    render_device->swapbuffers();
-                }
+                render_device->fill_and_execute_cmd();
+
+                render_device->swapbuffers();
+               
             }
            
         }
