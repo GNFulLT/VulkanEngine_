@@ -525,9 +525,7 @@ void RenderDevice::on_created()
 
 void RenderDevice::pre_render()
 {
-	ImGui_ImplVulkan_NewFrame();
-	ImGui::NewFrame();
-
+	
 	WindowManager::get_singleton()->pre_render();
 
 	ImGui::EndFrame();

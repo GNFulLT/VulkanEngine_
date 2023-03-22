@@ -23,7 +23,7 @@ public:
 	WindowManager();
 
 	void destroy() override;
-
+	void rebuild_window();
 	enum WINDOW_MODE
 	{
 		WINDOW_MODE_WINDOWED = 0,

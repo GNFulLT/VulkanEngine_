@@ -114,6 +114,13 @@ int main()
             render_device->on_created();
 
             render_device->beginFrameW();
+            render_device->beginFrame();
+            render_device->ready_ui_data();
+
+
+            render_device->beginFrameW();
+            render_device->beginFrame();
+            //window_manager->rebuild_window();
             render_device->pre_render();
         }
 
@@ -125,20 +132,26 @@ int main()
             {
                 if (render_device->does_swapchain_need_validate())
                 {
+                    render_device->validate_swapchain();
                     render_device->beginFrameW();
+                    render_device->beginFrame();
+                    window_manager->rebuild_window();
+                    render_device->pre_render();
 
-                    thread_pool_manager->run_flow(preRenderTask).wait();
+                    //thread_pool_manager->run_flow(preRenderTask).wait();
 
 
                 }
+                else
+                {
+                    render_device->beginFrameW();
 
-                render_device->beginFrameW();
+                    thread_pool_manager->run_flow(renderTask).wait();
 
-                thread_pool_manager->run_flow(renderTask).wait();
+                    render_device->fill_and_execute_cmd();
 
-                render_device->fill_and_execute_cmd();
-
-                render_device->swapbuffers();
+                    render_device->swapbuffers();
+                }
             }
            
         }

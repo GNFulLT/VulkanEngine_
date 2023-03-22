@@ -16,10 +16,13 @@ class RenderScene : public Object
 public:
 	RenderScene();
 	~RenderScene();
+
+	//X Needed
 	bool init(const GNF_UVec2& initial_size);
 
-	void render_ex(VkQueue queue,VkCommandBuffer buff, VkFence fence);
+	void on_resize(const GNF_UVec2& size);
 
+	void render_ex(VkQueue queue,VkCommandBuffer buff, VkFence fence);
 
 	_F_INLINE_ VkDescriptorSet get_image() const noexcept
 	{

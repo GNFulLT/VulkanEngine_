@@ -4,6 +4,7 @@
 #include "../../manager/rendering/render_device.h"
 #include "../../imgui/imgui.h"
 #include <boost/bind/bind.hpp>
+#include "../../imgui/imgui_internal.h"
 
 SceneWindow::SceneWindow(String name, RenderScene* pRenderScene) : Window(name), p_render_scene(pRenderScene)
 {
@@ -12,6 +13,9 @@ SceneWindow::SceneWindow(String name, RenderScene* pRenderScene) : Window(name),
 
 void SceneWindow::render()
 {
+
+	auto size = ImGui::GetContentRegionAvail();
+	m_size.set(GNF_UVec2(size.x, size.y));
 	ImGui::Image(p_render_scene->get_image(),ImVec2(1920,1080));
 }
 
@@ -23,6 +27,12 @@ bool SceneWindow::on_created()
 	size.x = 1920;
 	size.y = 1080;
 	return p_render_scene->init(size);
+}
+
+void SceneWindow::pre_render()
+{
+	auto size = ImGui::GetContentRegionAvail();
+	m_size.set(GNF_UVec2(size.x,size.y));
 }
 
 void SceneWindow::render_ex(VkQueue queue,VkCommandBuffer buff,VkFence fence)

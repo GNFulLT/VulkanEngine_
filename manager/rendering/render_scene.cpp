@@ -9,6 +9,10 @@ RenderScene::RenderScene()
 	m_physical_dev = RenderDevice::get_singleton()->get_render_device().physicalDev.physicalDev;
 }
 
+void RenderScene::on_resize(const GNF_UVec2& size)
+{
+}
+
 RenderScene::~RenderScene()
 {
 	if (m_image != nullptr)

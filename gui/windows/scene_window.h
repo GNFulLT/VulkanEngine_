@@ -15,7 +15,7 @@ public:
 	void render() override;
 	bool on_created() override;
 	void render_ex(VkQueue queue, VkCommandBuffer buff, VkFence fence);
-
+	void pre_render() override;
 private:
 	void on_device_destroyed(const bool& quitting);
 
