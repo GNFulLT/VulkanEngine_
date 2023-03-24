@@ -13,7 +13,7 @@ class Window : public Object
 {
 	OBJECT_DEF(Window,Object)
 public:
-	Window(const String& name) : m_size(this,GNF_UVec2(0,0),"Size")
+	Window(const String& name) : m_size(this,GNF_UVec2{.x=0,.y=0}, "Size")
 	{
 		m_windowName = name;
 	}

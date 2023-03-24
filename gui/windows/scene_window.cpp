@@ -29,13 +29,13 @@ bool SceneWindow::on_created()
 void SceneWindow::pre_render()
 {
 	auto size = ImGui::GetContentRegionAvail();
-	m_size.set(GNF_UVec2(size.x,size.y));
+	m_size.set(GNF_UVec2{ .x = (unsigned int)size.x, .y = (unsigned int)size.y });
 }
 
 void SceneWindow::on_size_changed()
 {
 	auto size = ImGui::GetContentRegionAvail();
-	m_size.set(GNF_UVec2(size.x, size.y));
+	m_size.set(GNF_UVec2{ .x = (unsigned int)size.x, .y = (unsigned int)size.y });
 }
 
 void SceneWindow::render_ex(VkQueue queue,VkCommandBuffer buff,VkFence fence)

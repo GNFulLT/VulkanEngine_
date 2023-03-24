@@ -21,13 +21,13 @@ public:
 	StringName(const char* name) : StringName()
 	{	
 		m_len =	(uint16_t) (strlen(name) > STRING_NAME_MAX_LEN ? STRING_NAME_MAX_LEN : strlen(name));
-		strncpy_s(m_name, name, m_len);
+		strncpy(m_name, name, m_len);
 	}
 
 	_F_INLINE_ void set_str(const char* name)
 	{
 		m_len = (uint16_t)(strlen(name) > STRING_NAME_MAX_LEN ? STRING_NAME_MAX_LEN : strlen(name));
-		strncpy_s(m_name, name, m_len);
+		strncpy(m_name, name, m_len);
 	}
 
 	_F_INLINE_ const char* c_str() const noexcept

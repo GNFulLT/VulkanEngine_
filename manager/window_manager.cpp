@@ -8,7 +8,7 @@
 #include "rendering/render_scene.h"
 #include <boost/format.hpp>
 
-WindowManager::WindowManager() : m_lastMode(WINDOW_MODE_WINDOWED), m_windowMode(this, WindowManager::WINDOW_MODE_WINDOWED, "WindowMode"), m_size(this, GNF_UVec2(640, 480), "Size")
+WindowManager::WindowManager() : m_lastMode(WINDOW_MODE_WINDOWED), m_windowMode(this, WindowManager::WINDOW_MODE_WINDOWED, "WindowMode"), m_size(this, GNF_UVec2{ .x = 640, .y = 480 }, "Size")
 {
 	m_dock_id = 0;
 }

@@ -10,7 +10,10 @@ void Window::on_size_changed()
 void Window::pre_render()
 {
 	auto size = ImGui::GetWindowSize();
-	this->m_size.set(GNF_UVec2(size.x,size.y));
+	GNF_UVec2 vec;
+	vec.x = size.x;
+	vec.y = size.y;
+	this->m_size.set(vec);
 }
 
 bool Window::on_created()
