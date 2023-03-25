@@ -79,7 +79,7 @@ void WindowManager::on_iconify_changed(int iconified)
 
 void WindowManager::destroy()
 {
-	int i = m_createdWindows.size();
+	size_t i = m_createdWindows.size();
 	auto windowIterator = m_createdWindows.begin();
 	while (windowIterator != m_createdWindows.end())
 	{
@@ -172,6 +172,7 @@ void WindowManager::pre_render()
 
 void WindowManager::render()
 {
+	bool needValidation = false;
 	// Main Menu
 	if (ImGui::BeginMainMenuBar())
 	{
@@ -179,7 +180,10 @@ void WindowManager::render()
 		{
 			for (auto& pair : m_registeredWindows)
 			{
-				ImGui::Checkbox(pair.second.second->get_name().c_str(), &pair.second.first);
+				if (ImGui::Checkbox(pair.second.second->get_name().c_str(), &pair.second.first))
+				{
+					needValidation = true;
+				}
 			
 			}
 
@@ -217,7 +221,7 @@ void WindowManager::render()
 		{
 			if (ImGui::Begin(window.second.second->get_name().c_str()))
 			{
-				if (window.second.second->check_size_changed())
+				if (needValidation && window.second.second->check_size_changed())
 				{
 					window.second.second->on_size_changed();
 				}
