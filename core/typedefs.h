@@ -15,6 +15,8 @@
 #endif // _STR
 // Force compile to make inline the function, variable etc.
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #ifndef _F_INLINE_
 #ifndef _DEBUG
 #if defined(__GNUC__)

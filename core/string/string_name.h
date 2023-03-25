@@ -3,8 +3,12 @@
 
 #define STRING_NAME_MAX_LEN 255
 
-#include "../typedefs.h"
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif 
 
+#include "../typedefs.h"
 class StringName
 {
 
@@ -45,6 +49,9 @@ private:
 	char m_name[STRING_NAME_MAX_LEN];
 };
 
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif 
 
 
 #endif // STRING_NAME_H
