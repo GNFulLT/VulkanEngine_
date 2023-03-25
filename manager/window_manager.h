@@ -71,9 +71,9 @@ public:
 		return m_registeredWindows.find(str).operator->()->second.second;
 	}
 	
-	_INLINE_ bool register_window(Window* window)
+	_INLINE_ bool register_window(Window* window,bool initial_visibility = true)
 	{
-		m_registeredWindows.emplace(window->get_name(),std::pair(true,window));
+		m_registeredWindows.emplace(window->get_name(),std::pair(initial_visibility,window));
 		m_registeredWindowsList.push_back(window);
 		return true;
 	}
@@ -116,6 +116,7 @@ private:
 	ConfigProperty<GNF_UVec2> m_size;
 	ConfigProperty<WINDOW_MODE> m_windowMode;
 	WINDOW_MODE m_lastMode;
+	bool m_needValidation = false;
 private:
 	std::vector<Window*> m_registeredWindowsList;
 	std::unordered_map<String,Window*> m_createdWindows;
