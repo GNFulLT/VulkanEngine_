@@ -108,7 +108,7 @@ void WindowManager::rebuild_window()
 		0.2f, nullptr, &dock_id_middle);
 
 	ImGui::DockBuilderDockWindow("Dear ImGui Demo", dock_id_left);
-	ImGui::DockBuilderDockWindow("Zort", dock_id_rigt_menu);
+	ImGui::DockBuilderDockWindow("Text Editor", dock_id_rigt_menu);
 	ImGui::DockBuilderDockWindow("Scene", dock_id_middle);
 
 	ImGui::DockBuilderFinish(m_dock_id);
@@ -214,18 +214,34 @@ void WindowManager::render()
 
 	ImGui::ShowDemoWindow();
 
-
-	for (auto& window : m_registeredWindows)
+	if (m_needValidation)
 	{
-		if (window.second.first && window.second.second->need_render())
+		for (auto& window : m_registeredWindows)
 		{
-			if (ImGui::Begin(window.second.second->get_name().c_str()))
+			if (window.second.first && window.second.second->need_render())
 			{
-				if (needValidation && window.second.second->check_size_changed())
+				if (ImGui::Begin(window.second.second->get_name().c_str()))
 				{
-					window.second.second->on_size_changed();
+					if (window.second.second->check_size_changed())
+					{
+						window.second.second->on_size_changed();
+					}
+					else
+					{
+						window.second.second->render();
+					}
+					ImGui::End();
 				}
-				else
+			}
+		}
+	}
+	else
+	{
+		for (auto& window : m_registeredWindows)
+		{
+			if (window.second.first && window.second.second->need_render())
+			{
+				if (ImGui::Begin(window.second.second->get_name().c_str()))
 				{
 					window.second.second->render();
 				}
@@ -233,8 +249,10 @@ void WindowManager::render()
 			}
 		}
 	}
+	
 
 	ImGui::End();
+	m_needValidation = needValidation;
 }
 
 void WindowManager::on_created()
@@ -273,7 +291,7 @@ void WindowManager::on_created()
 		0.2f, nullptr, &dock_id_middle);
 
 	ImGui::DockBuilderDockWindow("Dear ImGui Demo", dock_id_left);
-	ImGui::DockBuilderDockWindow("Zort", dock_id_rigt_menu);
+	ImGui::DockBuilderDockWindow("Text Editor", dock_id_rigt_menu);
 	ImGui::DockBuilderDockWindow("Scene", dock_id_middle);
 
 	ImGui::DockBuilderFinish(m_dock_id);

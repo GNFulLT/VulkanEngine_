@@ -95,8 +95,8 @@ int main()
         TextEditorWindow* window;
         SceneWindow* scene_window;
 
-        window_manager->create_window("Zort",&window);
-        window_manager->register_window(window);
+        window_manager->create_window("Text Editor",&window);
+        window_manager->register_window(window,false);
         window->set_file_to_edit("./text_edit.glsl");
         
         window_manager->create_window("Scene", &scene_window, memory_manager->new_object<RenderScene>("SceneRenderer"));
