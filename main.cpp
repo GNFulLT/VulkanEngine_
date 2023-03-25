@@ -64,11 +64,11 @@ int main()
     {
         tf::Taskflow renderTask;
 
-        renderTask.emplace([dev = render_device]() {
-            dev->beginFrame();
-            //fture = pool->run_flow(flow);
-            dev->ready_ui_data();
-            });
+        //renderTask.emplace([dev = render_device]() {
+        //    dev->beginFrame();
+        //    //fture = pool->run_flow(flow);
+        //    dev->ready_ui_data();
+        //    });
 
         renderTask.emplace([dev = render_device]() {
             dev->reset_things();
@@ -137,15 +137,16 @@ int main()
                     render_device->beginFrame();
                     window_manager->rebuild_window();
                     render_device->pre_render();
-
-                    //thread_pool_manager->run_flow(preRenderTask).wait();
-
-
                 }
                 
-                render_device->beginFrameW();
+                render_device->reset_things();
+                render_device->set_next_image();
 
-                thread_pool_manager->run_flow(renderTask).wait();
+                render_device->beginFrameW();
+                render_device->beginFrame();
+                render_device->ready_ui_data();
+                
+                //thread_pool_manager->run_flow(renderTask);
 
 
                 render_device->fill_and_execute_cmd();
