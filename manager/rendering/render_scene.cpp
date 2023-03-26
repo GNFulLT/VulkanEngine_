@@ -9,8 +9,24 @@ RenderScene::RenderScene()
 	m_physical_dev = RenderDevice::get_singleton()->get_render_device().physicalDev.physicalDev;
 }
 
+
+
 void RenderScene::on_resize(const GNF_UVec2& size)
 {
+	destroy();
+	init(size);
+}
+
+bool RenderScene::fill_cmd(VkCommandBuffer buff)
+{
+	auto res = vkBeginCommandBuffer(buff, get_main_begin_inf());
+	vkCmdBeginRenderPass(buff, get_main_renderpass_begin_inf(), VK_SUBPASS_CONTENTS_INLINE);
+
+
+	vkCmdEndRenderPass(buff);
+	res = vkEndCommandBuffer(buff);
+
+	return true;
 }
 
 RenderScene::~RenderScene()
@@ -160,6 +176,35 @@ bool RenderScene::init(const GNF_UVec2& initial_size)
 	m_descriptor_set = ImGui_ImplVulkan_AddTexture(m_image_sampler, m_image_view, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	return true;
 
+}
+
+void RenderScene::destroy()
+{
+	if (m_image != nullptr)
+	{
+		vkDestroyImage(m_dev, m_image, nullptr);
+		if (m_image_memory != nullptr)
+		{
+			vkFreeMemory(m_dev, m_image_memory, nullptr);
+			if (m_image_view != nullptr)
+			{
+				vkDestroyImageView(m_dev, m_image_view, nullptr);
+				if (m_render_pass != nullptr)
+				{
+					vkDestroyRenderPass(m_dev, m_render_pass, nullptr);
+					if (m_frame_buffer != nullptr)
+					{
+						vkDestroyFramebuffer(m_dev, m_frame_buffer, nullptr);
+						if (m_image_sampler != nullptr)
+						{
+							vkDestroySampler(m_dev, m_image_sampler, nullptr);
+						}
+					}
+				}
+			}
+		}
+
+	}
 }
 
 

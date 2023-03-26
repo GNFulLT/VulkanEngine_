@@ -19,11 +19,10 @@ public:
 
 	//X Needed
 	bool init(const GNF_UVec2& initial_size);
-
+	void destroy();
 	void on_resize(const GNF_UVec2& size);
-
 	void render_ex(VkQueue queue,VkCommandBuffer buff, VkFence fence);
-
+	bool fill_cmd(VkCommandBuffer buff);
 	_F_INLINE_ VkDescriptorSet get_image() const noexcept
 	{
 		return m_descriptor_set;
