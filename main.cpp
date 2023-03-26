@@ -5,6 +5,7 @@
 #include "manager/window_manager.h"
 #include "manager/rendering/render_device.h"
 #include "manager/thread_pool_manager.h"
+#include "manager/timer_manager.h"
 
 #include "gui/windows/debug_window.h"
 #include "gui/windows/text_editor_window.h"
@@ -17,6 +18,7 @@ LoggerManager* logger_manager;
 ThreadPoolManager* thread_pool_manager;
 WindowManager* window_manager;
 RenderDevice* render_device;
+TimerManager* timer_manager;
 int main()
 {
     mi_stats_reset();  // ignore earlier allocations
@@ -42,6 +44,12 @@ int main()
     ThreadPoolManager::set_singleton(thread_pool_manager);
 
     manager_stack.push(thread_pool_manager);
+
+    timer_manager = memory_manager->create_singleton_object<TimerManager>("TimerManager");
+
+    manager_stack.push(timer_manager);
+
+    TimerManager::set_singleton(timer_manager);
 
     window_manager = memory_manager->create_singleton_object<WindowManager>("WindowManager");
 
@@ -127,6 +135,9 @@ int main()
 
         while (!window_manager->wants_close())
         {
+            auto deltaTime = timer_manager->calculate_delta_time();
+            auto fps = timer_manager->calc_fps();
+           
             window_manager->handle_window_events();
             if (window_manager->need_render())
             {
