@@ -44,6 +44,7 @@ private:
 	VkRenderPass m_render_pass = nullptr;
 	VkFramebuffer m_frame_buffer = nullptr;
 private:
+	bool isViewDirty = false;
 	_INLINE_ VkCommandBufferBeginInfo* get_main_begin_inf()
 	{
 		static VkCommandBufferBeginInfo beginInf{

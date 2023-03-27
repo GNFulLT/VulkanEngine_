@@ -126,4 +126,5 @@ ImGuiDraw::~ImGuiDraw()
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
+	vkDestroyDescriptorPool(RenderDevice::get_singleton()->m_renderDevice.logicalDevice, this->imguiPool, nullptr);
 }

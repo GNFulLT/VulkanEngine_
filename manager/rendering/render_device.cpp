@@ -79,6 +79,7 @@ RenderDevice::~RenderDevice()
 
 		vkDestroySemaphore(m_renderDevice.logicalDevice, m_renderDevice.imageAcquiredSemaphore, nullptr);
 		vkDestroySemaphore(m_renderDevice.logicalDevice, m_renderDevice.renderCompleteSemaphore, nullptr);
+		vkDestroySemaphore(m_renderDevice.logicalDevice, m_renderDevice.renderSceneCompleteSemaphore, nullptr);
 
 		for (int i = 0; i < m_swapchain.frameBuffers.size(); i++)
 		{
@@ -90,6 +91,7 @@ RenderDevice::~RenderDevice()
 			vkDestroyImageView(m_renderDevice.logicalDevice, m_swapchain.swapchainImageViews[i], nullptr);
 		}
 
+		vkDestroyRenderPass(m_renderDevice.logicalDevice, m_swapchain.renderPass,nullptr);
 		if (m_swapchain.swapchain != nullptr)
 			vkDestroySwapchainKHR(m_renderDevice.logicalDevice, m_swapchain.swapchain, nullptr);
 
@@ -508,17 +510,6 @@ void RenderDevice::on_created()
 	size.y = m_instance.surfaceExtent.height;
 
 	vkResetCommandPool(m_renderDevice.logicalDevice, m_renderDevice.mainQueueCommandPools[0], 0);
-
-
-	// Fence created as signaled so turn off
-	vkResetFences(m_renderDevice.logicalDevice, 1, &m_renderDevice.mainQueueFinishedFence);
-
-	((SceneWindow*)(WindowManager::get_singleton()->get_registered_window("Scene")))->render_ex(m_renderDevice.mainQueue, m_renderDevice.pMainCommandBuffer, m_renderDevice.mainQueueFinishedFence);
-
-	vkWaitForFences(m_renderDevice.logicalDevice, 1, &m_renderDevice.mainQueueFinishedFence, true, UINT64_MAX);
-
-	vkResetCommandPool(m_renderDevice.logicalDevice, m_renderDevice.mainQueueCommandPools[0], 0);
-
 }
 
 void RenderDevice::pre_render()
@@ -589,8 +580,8 @@ void RenderDevice::fill_and_execute_cmd()
 	vkCmdEndRenderPass(m_renderDevice.pMainCommandBuffer);
 	vkEndCommandBuffer(m_renderDevice.pMainCommandBuffer);
 
-
-	vkQueueSubmit(m_renderDevice.mainQueue, 1, this->get_main_submit_info(1, &m_renderDevice.pMainCommandBuffer), m_renderDevice.mainQueueFinishedFence);
+	auto t = this->get_main_submit_info(1, &m_renderDevice.pMainCommandBuffer);
+	vkQueueSubmit(m_renderDevice.mainQueue, 1, t, m_renderDevice.mainQueueFinishedFence);
 }
 
 void RenderDevice::render_scene()
@@ -600,12 +591,14 @@ void RenderDevice::render_scene()
 	{
 		((SceneWindow*)WindowManager::get_singleton()->get_registered_window("Scene"))->get_render_scene()->fill_cmd(m_renderDevice.pSceneCommandBuffer);
 		VkSubmitInfo inf = {};
+		VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		inf.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		inf.pNext = nullptr;
 		inf.commandBufferCount = 1;
 		inf.pCommandBuffers = &m_renderDevice.pSceneCommandBuffer;
 		inf.signalSemaphoreCount = 1;
 		inf.pSignalSemaphores = &m_renderDevice.renderSceneCompleteSemaphore;
+		inf.pWaitDstStageMask = &waitStage;
 		vkQueueSubmit(m_renderDevice.mainQueue, 1, &inf, nullptr);
 	}
 }

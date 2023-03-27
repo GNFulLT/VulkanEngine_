@@ -145,16 +145,18 @@ int main()
             window_manager->handle_window_events();
             if (window_manager->need_render())
             {
-                if (render_device->does_swapchain_need_validate())
+                render_device->reset_things();
+
+                if (render_device->does_swapchain_need_validate() || window_manager->need_validation())
                 {
-                    render_device->validate_swapchain();
+                    if(render_device->does_swapchain_need_validate())
+                        render_device->validate_swapchain();
                     render_device->beginFrameW();
                     render_device->beginFrame();
                     window_manager->rebuild_window();
                     render_device->pre_render();
                 }
                 
-                render_device->reset_things();
                 render_device->set_next_image();
                 render_device->render_scene();
 
@@ -172,6 +174,7 @@ int main()
             }
            
         }
+        render_device->reset_things();
     }
     
 

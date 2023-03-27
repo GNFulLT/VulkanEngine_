@@ -67,6 +67,11 @@ public:
 		m_createdWindows.erase(ptr->get_name());
 		MemoryManager::get_singleton()->destroy_object<T>(ptr);
 	}
+	
+	_INLINE_ bool need_validation() const noexcept
+	{
+		return m_needValidation;
+	}
 
 	_INLINE_ Window* get_registered_window(const String& str)
 	{

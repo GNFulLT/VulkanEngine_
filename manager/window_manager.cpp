@@ -219,8 +219,18 @@ void WindowManager::render()
 
 
 	ImGui::ShowDemoWindow();
-
-	if (m_needValidation)
+	for (auto& window : m_registeredWindows)
+	{
+		if (window.second.first && window.second.second->need_render())
+		{
+			if (ImGui::Begin(window.second.second->get_name().c_str()))
+			{
+				window.second.second->render();
+			}
+			ImGui::End();
+		}
+	}
+	/*if (m_needValidation)
 	{
 		for (auto& window : m_registeredWindows)
 		{
@@ -254,7 +264,7 @@ void WindowManager::render()
 				ImGui::End();
 			}
 		}
-	}
+	}*/
 	
 
 	ImGui::End();

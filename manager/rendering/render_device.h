@@ -191,7 +191,7 @@ public:
 	void swapbuffers();
 	_INLINE_ VkSubmitInfo* get_main_submit_info(uint32_t cmdCount, VkCommandBuffer* buffs)
 	{
-		static VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		static VkPipelineStageFlags waitStage[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		static VkSemaphore* semaphores[] = { &m_renderDevice.imageAcquiredSemaphore,&m_renderDevice.renderSceneCompleteSemaphore };
 		static VkSubmitInfo submitInfo
 		{
@@ -199,7 +199,7 @@ public:
 			nullptr,
 			2,
 			semaphores[0],
-			&waitStage,
+			waitStage,
 			0,
 			nullptr,
 			1,
@@ -207,6 +207,7 @@ public:
 		};
 		if (m_renderScene)
 		{
+			
 			submitInfo.pWaitSemaphores = semaphores[0];
 			submitInfo.waitSemaphoreCount = 2;
 		}
