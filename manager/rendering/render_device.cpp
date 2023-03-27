@@ -205,7 +205,7 @@ bool RenderDevice::init_vk_instance()
 			return false;
 		}
 
-		bool isDebugEnabled = false;
+		bool isDebugEnabled = true;
 	
 		bool isDebugLayerAdded = false;
 		if (isDebugEnabled)

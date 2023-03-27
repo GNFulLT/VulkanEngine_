@@ -207,13 +207,13 @@ public:
 		};
 		if (m_renderScene)
 		{
-			submitInfo.pSignalSemaphores = semaphores[0];
-			submitInfo.signalSemaphoreCount = 2;
+			submitInfo.pWaitSemaphores = semaphores[0];
+			submitInfo.waitSemaphoreCount = 2;
 		}
 		else
 		{
-			submitInfo.pSignalSemaphores = &m_renderDevice.imageAcquiredSemaphore;
-			submitInfo.signalSemaphoreCount = 1;
+			submitInfo.pWaitSemaphores = &m_renderDevice.imageAcquiredSemaphore;
+			submitInfo.waitSemaphoreCount = 1;
 		}
 		submitInfo.commandBufferCount = cmdCount;
 		submitInfo.pCommandBuffers = buffs;

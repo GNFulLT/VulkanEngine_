@@ -72,20 +72,24 @@ int main()
     {
         tf::Taskflow renderTask;
 
+        renderTask.emplace([render_device= render_device]() {
+            render_device->render_scene();
+
+           });
         //renderTask.emplace([dev = render_device]() {
         //    dev->beginFrame();
         //    //fture = pool->run_flow(flow);
         //    dev->ready_ui_data();
         //    });
 
-        renderTask.emplace([dev = render_device]() {
-            dev->reset_things();
+        //renderTask.emplace([dev = render_device]() {
+        //    dev->reset_things();
 
-            });
-        renderTask.emplace([dev = render_device]() {
-            dev->set_next_image();
+        //    });
+        //renderTask.emplace([dev = render_device]() {
+        //    dev->set_next_image();
 
-            });
+        //    });
 
         tf::Taskflow preRenderTask;
 
@@ -152,8 +156,8 @@ int main()
                 
                 render_device->reset_things();
                 render_device->set_next_image();
-
                 render_device->render_scene();
+
                 render_device->beginFrameW();
                 render_device->beginFrame();
                 render_device->ready_ui_data();
