@@ -153,6 +153,7 @@ int main()
                 render_device->reset_things();
                 render_device->set_next_image();
 
+                render_device->render_scene();
                 render_device->beginFrameW();
                 render_device->beginFrame();
                 render_device->ready_ui_data();

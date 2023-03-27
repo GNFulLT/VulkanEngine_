@@ -413,11 +413,9 @@ bool RenderDevice::init_command_buffers()
 
 	m_renderDevice.pMainCommandBuffer = m_renderDevice.commandBuffers[0][0];
 
-	inf.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
-
 	vkAllocateCommandBuffers(m_renderDevice.logicalDevice, &inf, &(m_renderDevice.commandBuffers[0][1]));
 
-
+	m_renderDevice.pSceneCommandBuffer = m_renderDevice.commandBuffers[0][1];
 
 	return true;
 }
@@ -593,6 +591,23 @@ void RenderDevice::fill_and_execute_cmd()
 
 
 	vkQueueSubmit(m_renderDevice.mainQueue, 1, this->get_main_submit_info(1, &m_renderDevice.pMainCommandBuffer), m_renderDevice.mainQueueFinishedFence);
+}
+
+void RenderDevice::render_scene()
+{
+	m_renderScene = WindowManager::get_singleton()->need_render("Scene");
+	if (m_renderScene)
+	{
+		((SceneWindow*)WindowManager::get_singleton()->get_registered_window("Scene"))->get_render_scene()->fill_cmd(m_renderDevice.pSceneCommandBuffer);
+		VkSubmitInfo inf = {};
+		inf.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		inf.pNext = nullptr;
+		inf.commandBufferCount = 1;
+		inf.pCommandBuffers = &m_renderDevice.pSceneCommandBuffer;
+		inf.signalSemaphoreCount = 1;
+		inf.pSignalSemaphores = &m_renderDevice.renderSceneCompleteSemaphore;
+		vkQueueSubmit(m_renderDevice.mainQueue, 1, &inf, nullptr);
+	}
 }
 
 void RenderDevice::render2()
@@ -1286,6 +1301,10 @@ bool RenderDevice::init_vk_syncs()
 	if (res != VK_SUCCESS)
 		return false;
 
+	res = vkCreateSemaphore(m_renderDevice.logicalDevice, &createInfo, nullptr, &m_renderDevice.renderSceneCompleteSemaphore);
+	if (res != VK_SUCCESS)
+		return false;
+	
 
 	VkFenceCreateInfo fCreateInfo = {};
 	fCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;

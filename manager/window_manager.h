@@ -36,6 +36,8 @@ public:
 
 	bool need_render();
 
+	bool need_render(const String& windowName);
+
 	_F_INLINE_ GLFWwindow* get_window()
 	{
 		return m_window;

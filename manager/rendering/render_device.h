@@ -22,6 +22,7 @@
 
 #include "../../core/vec2.h"
 #include "../system_manager.h"
+#include "../window_manager.h"
 
 class CreationServer;
 class ImGuiDraw;
@@ -100,7 +101,8 @@ public:
 		std::vector<VkCommandPool> mainQueueCommandPools;
 
 		VkCommandBuffer pMainCommandBuffer = nullptr;
-
+		VkCommandBuffer pSceneCommandBuffer = nullptr;
+	
 		std::unordered_map<unsigned int, std::vector<VkCommandBuffer>> commandBuffers;
 
 
@@ -110,7 +112,7 @@ public:
 		//! Sync
 		VkSemaphore renderCompleteSemaphore = nullptr;
 		VkSemaphore imageAcquiredSemaphore = nullptr;
-
+		VkSemaphore renderSceneCompleteSemaphore = nullptr;
 
 		VkFence	mainQueueFinishedFence = nullptr;
 		VkFence presentQueueFinishedFence = nullptr;
@@ -138,6 +140,9 @@ public:
 	void beginFrameW();
 
 	void ready_ui_data();
+
+	//X TODO : Should take Scene class
+	void render_scene();
 
 	void set_next_image();
 
@@ -187,20 +192,29 @@ public:
 	_INLINE_ VkSubmitInfo* get_main_submit_info(uint32_t cmdCount, VkCommandBuffer* buffs)
 	{
 		static VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-
+		static VkSemaphore* semaphores[] = { &m_renderDevice.imageAcquiredSemaphore,&m_renderDevice.renderSceneCompleteSemaphore };
 		static VkSubmitInfo submitInfo
 		{
 			VK_STRUCTURE_TYPE_SUBMIT_INFO,
 			nullptr,
-			1,
-			&m_renderDevice.imageAcquiredSemaphore,
+			2,
+			semaphores[0],
 			&waitStage,
 			0,
 			nullptr,
 			1,
 			&m_renderDevice.renderCompleteSemaphore
 		};
-
+		if (m_renderScene)
+		{
+			submitInfo.pSignalSemaphores = semaphores[0];
+			submitInfo.signalSemaphoreCount = 2;
+		}
+		else
+		{
+			submitInfo.pSignalSemaphores = &m_renderDevice.imageAcquiredSemaphore;
+			submitInfo.signalSemaphoreCount = 1;
+		}
 		submitInfo.commandBufferCount = cmdCount;
 		submitInfo.pCommandBuffers = buffs;
 
@@ -272,7 +286,7 @@ private:
 
 	ImGuiDraw* imguiDraw;
 	bool m_canContinue = true;
-
+	bool m_renderScene = true;
 	ConfigProperty<bool> m_quitting;
 private:
 	friend class CreationServer;

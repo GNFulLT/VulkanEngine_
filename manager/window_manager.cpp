@@ -13,6 +13,12 @@ WindowManager::WindowManager() : m_lastMode(WINDOW_MODE_WINDOWED), m_windowMode(
 	m_dock_id = 0;
 }
 
+bool WindowManager::need_render(const String& windowName)
+{
+	auto win = m_registeredWindows.find(windowName).operator->();
+	return need_render() && win->second.first && win->second.second->need_render();
+}
+
 bool WindowManager::init()
 {
 

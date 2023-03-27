@@ -20,7 +20,7 @@ void RenderScene::on_resize(const GNF_UVec2& size)
 bool RenderScene::fill_cmd(VkCommandBuffer buff)
 {
 	auto res = vkBeginCommandBuffer(buff, get_main_begin_inf());
-	vkCmdBeginRenderPass(buff, get_main_renderpass_begin_inf(), VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(buff, get_main_renderpass_begin_inf(m_render_pass,m_frame_buffer), VK_SUBPASS_CONTENTS_INLINE);
 
 
 	vkCmdEndRenderPass(buff);
@@ -68,7 +68,7 @@ bool RenderScene::init(const GNF_UVec2& initial_size)
 	
 
 	if(!create_image(m_dev, m_physical_dev, initial_size.x, initial_size.y, RenderDevice::get_singleton()->get_instance().format.format,
-	VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 
+	VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_image, m_image_memory))
 	{
 		return false;
@@ -86,19 +86,19 @@ bool RenderScene::init(const GNF_UVec2& initial_size)
 	color_attachment.format = RenderDevice::get_singleton()->get_instance().format.format;
 	//1 sample, we won't be doing MSAA
 	color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	// we Clear when this attachment is loaded
+	// Clear while loading
 	color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	// we keep the attachment stored when the renderpass ends
+	// keep end state
 	color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	//we don't care about stencil
+	//X TODO:  No stencil for now
 	color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-	//we don't know or care about the starting layout of the attachment
+	// Used as frame buffer
 	color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-	//after the renderpass ends, the image has to be on a layout ready for display
-	color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	// Texture will be used shader for read only to display in scene window
+	color_attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 
 	VkAttachmentReference color_attachment_ref = {};
@@ -173,7 +173,7 @@ bool RenderScene::init(const GNF_UVec2& initial_size)
 	}
 	
 		
-	m_descriptor_set = ImGui_ImplVulkan_AddTexture(m_image_sampler, m_image_view, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	m_descriptor_set = ImGui_ImplVulkan_AddTexture(m_image_sampler, m_image_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	return true;
 
 }
@@ -211,7 +211,7 @@ void RenderScene::destroy()
 void RenderScene::render_ex(VkQueue queue, VkCommandBuffer buff,VkFence fence)
 {
 	auto res = vkBeginCommandBuffer(buff, get_main_begin_inf());
-	vkCmdBeginRenderPass(buff, get_main_renderpass_begin_inf(), VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(buff, get_main_renderpass_begin_inf(m_render_pass,m_frame_buffer), VK_SUBPASS_CONTENTS_INLINE);
 
 
 	vkCmdEndRenderPass(buff);

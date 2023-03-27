@@ -56,7 +56,7 @@ private:
 		return &beginInf;
 	}
 
-	_INLINE_ VkRenderPassBeginInfo* get_main_renderpass_begin_inf()
+	_INLINE_ VkRenderPassBeginInfo* get_main_renderpass_begin_inf(VkRenderPass renderPass,VkFramebuffer fb)
 	{
 		static VkClearValue clearValue
 		{
@@ -72,7 +72,8 @@ private:
 			1,
 			&clearValue
 		};
-
+		beginInf.renderPass = renderPass;
+		beginInf.framebuffer = fb;
 		beginInf.renderArea.extent.width = m_size.x;
 		beginInf.renderArea.extent.height = m_size.y;
 
