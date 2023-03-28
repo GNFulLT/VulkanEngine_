@@ -40,6 +40,13 @@
 #endif // _DEBUG
 #endif // _INLINe_
 
+#ifndef _NO_EXCEPT_
+#ifdef _DEBUG
+#define _NO_EXPECT_ 
+#endif // _DEBUG
+#define _NO_EXCEPT_ noexcept
+#endif // _NOEXCEPT_
+
 // Inform the compiler that the return value of the function is important and shouldn't be ignored
 #ifndef _IMP_RETURN_
 #define _IMP_RETURN_ [[nodiscard]]

@@ -17,6 +17,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/exception/exception.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/manager/manager.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/imgui/imgui.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/gui/gui.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/graphic/graphic.cmake)
 
 file(GLOB VulkanEngine_SRC
     main.cpp
@@ -26,6 +27,7 @@ file(GLOB VulkanEngine_SRC
     ${VulkanEngine_MANAGER_SRC}
     ${VulkanEngine_IMGUI_SRC}
     ${VulkanEngine_GUI_SRC}
+    ${VulkanEngine_GRAPHIC_SRC}
 )
 
 
