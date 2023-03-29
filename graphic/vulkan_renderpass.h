@@ -17,6 +17,7 @@ struct VulkanRenderpass
 	{
 		_info = {};
 		_isFailed = true;
+		_subpassContents = VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE;
 	}
 	void create(VkDevice dev,VkImageView imageView,uint32_t width,uint32_t height, const std::vector<VkClearValue>& clearValues,
 		VkFormat format,VkImageLayout finalLayout,VkImageLayout attachmentReferenceLayout,VkSubpassContents subpassContents = VK_SUBPASS_CONTENTS_INLINE)

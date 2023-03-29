@@ -76,11 +76,9 @@ int main()
             render_device->render_scene();
 
            });
-        //renderTask.emplace([dev = render_device]() {
-        //    dev->beginFrame();
-        //    //fture = pool->run_flow(flow);
-        //    dev->ready_ui_data();
-        //    });
+        renderTask.emplace([dev = render_device]() {
+            render_device->set_next_image();
+            });
 
         //renderTask.emplace([dev = render_device]() {
         //    dev->reset_things();
@@ -157,15 +155,15 @@ int main()
                     render_device->pre_render();
                 }
                 
-                render_device->set_next_image();
-                render_device->render_scene();
+                auto future = thread_pool_manager->run_flow(renderTask);
+
+                //render_device->render_scene();
 
                 render_device->beginFrameW();
                 render_device->beginFrame();
                 render_device->ready_ui_data();
                 
-                //thread_pool_manager->run_flow(renderTask);
-
+                future.wait();
 
                 render_device->fill_and_execute_cmd();
 
