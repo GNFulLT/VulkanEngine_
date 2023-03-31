@@ -1,6 +1,5 @@
 file(GLOB VulkanEngine_MANAGER_SRC
 	"manager/memory_manager.h"
-	"manager/memory_manager.cpp"
 	"manager/system_manager.h"
 	"manager/system_manager.cpp"
 	"manager/logger_manager.h"
