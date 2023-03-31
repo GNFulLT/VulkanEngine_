@@ -15,6 +15,7 @@ file(GLOB VulkanEngine_CORE_SRC
 	"core/object/property.cpp"
 	"core/object/type.h"
 	"core/object/argument.h"
+	"core/object/object_db.cpp"
 	"core/serialize/serializable_struct.h"
 	"core/serialize/serializable_enum.h"
 	"core/string/locales.h"
