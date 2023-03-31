@@ -22,40 +22,19 @@
 #include <boost/uuid/uuid_io.hpp>        
 #include <boost/functional/hash.hpp>
 
-template<typename T>
-concept object_type = std::convertible_to<T*, Object*>;
+#include "../core/object/object_db.h"
+
 
 template<typename T>
 concept TrivialConstructable = not std::is_trivially_constructible<T>::value;
-
-struct MemoryObjectMetaInfo
-{
-	StringName name;
-	ObjectID id;
-	size_t mem_size;
-};
-	
-struct MemorySingletonMetaInfo
-{
-	StringName name;
-	size_t mem_size;
-};
-
 
 class MemoryManager
 {
 	SINGLETON(MemoryManager)
 public:
-	typedef boost::singleton_pool<MemoryObjectMetaInfo, sizeof(MemoryObjectMetaInfo)> g_object_meta_info_mem;
 
 	MemoryManager()
 	{
-		// Register itself to mem_map
-		auto inf = static_cast<MemorySingletonMetaInfo*>(m_singleton_info_mem.malloc());
-		inf->mem_size = sizeof(MemoryManager);
-		inf->name.set_str("MemoryManager");
-		m_singleton_mem_map.emplace(hash_string(inf->name.c_str()),this);
-		m_singleton_meta_inf_map.emplace(this, inf);
 		m_allocated_blocks.insert(this);
 	}
 
@@ -67,9 +46,6 @@ public:
 		{
 			std::cout << "There is a thing that is not destroyed";
 		}
-	/*	m_singleton_info_mem.release_memory();
-
-		m_singleton_info_mem.purge_memory();*/
 	}
 
 	_F_INLINE_ size_t* malloc_pool_size_t()
@@ -96,40 +72,22 @@ public:
 	template<object_type Obj, typename... Args>
 	_IMP_RETURN_ _INLINE_ Obj* new_object(const String& name, Args... args)
 	{
-		if (m_object_mem_map.find(hash_string(name)) != m_object_mem_map.end())
-			return nullptr;
 		void* ptr = mi_malloc(sizeof(Obj));
-		auto info = (MemoryObjectMetaInfo*)g_object_meta_info_mem::malloc();
-		info->name.set_str(name.c_str());
-		info->mem_size = sizeof(Obj);
-		info->id = boost::hash_value(generator());
-
-		auto hashedName = hash_string(name);
-
-		m_object_meta_inf_map.emplace(ptr,info);
-		m_allocated_blocks.insert(ptr);
-		m_object_mem_map.emplace(hashedName,ptr);
-		m_object_name_map.emplace(ptr, hashedName);
-
-		Object* oPtr = new (ptr) Obj(args...);
 		
-		oPtr->set_memory_name(name.c_str());
+		m_allocated_blocks.insert(ptr);
+		
+		Obj* oPtr = new (ptr) Obj(args...);
+		
+		ObjectDB::register_object(oPtr);
 
-		return (Obj*)oPtr;
+		return oPtr;
 	}
 
 	template<object_type Obj, typename... Args>
 	_F_INLINE_ Obj* create_singleton_object(const String& class_name,Args... args)
 	{
-		if (m_object_mem_map.find(hash_string(class_name)) != m_object_mem_map.end())
-			return nullptr;
-
 		Object* object = (Object*)new_object<Obj>(class_name, args...);
-		auto info = (MemorySingletonMetaInfo*)m_singleton_info_mem.malloc();
-		info->mem_size = sizeof(Obj);
-		info->name.set_str(object->get_memory_name());
-		m_singleton_meta_inf_map.emplace(object, info);
-		m_singleton_mem_map.emplace(hash_string(String(info->name.c_str())), object);
+		
 		return (Obj*)object;	
 	}
 
@@ -140,10 +98,7 @@ public:
 		/*assert(m_allocated_blocks.find(ptr) != m_allocated_blocks.end());
 		assert(m_object_name_map.find(ptr) != m_object_name_map.end());*/
 
-		g_object_meta_info_mem::free(m_object_meta_inf_map[ptr]);
-		m_object_meta_inf_map.erase(ptr);
-		m_object_mem_map.erase(m_object_name_map[ptr]);
-		m_object_name_map.erase(ptr);
+		ObjectDB::unregister_object(ptr);
 		m_allocated_blocks.erase(ptr);
 
 		ptr->~Obj();
@@ -154,10 +109,6 @@ public:
 	template<object_type Obj>
 	_F_INLINE_ void destroy_singleton_object(Obj* ptr)
 	{
-		m_singleton_mem_map.erase(hash_string(((Object*)ptr)->get_memory_name()));
-		auto info = m_singleton_meta_inf_map[(void*)ptr];
-		m_singleton_info_mem.free(info);
-		m_singleton_meta_inf_map.erase((void*)ptr);
 		destroy_object<Obj>(ptr);
 		
 	}
@@ -272,7 +223,8 @@ public:
 
 	_F_INLINE_ bool is_singleton(void* ptr)
 	{
-		return (m_allocated_blocks.find(ptr) != m_allocated_blocks.end()) && (m_singleton_meta_inf_map.find(ptr) != m_singleton_meta_inf_map.end());
+		assert(false);
+		return (m_allocated_blocks.find(ptr) != m_allocated_blocks.end());
 	}
 
 	_F_INLINE_ bool is_valid(void* ptr)
@@ -283,19 +235,6 @@ public:
 	_F_INLINE_ void destroy()
 	{
 		dealloc<MemoryManager>(this);
-	}
-
-
-	_F_INLINE_ void* get_singleton_by_class_name(const char* name)
-	{
-		if (auto mem = m_singleton_mem_map.find(hash_string(name));mem != m_singleton_mem_map.end())
-		{
-			return mem->second;
-		}
-		else
-		{
-			return nullptr;
-		}
 	}
 
 	// Statics
@@ -311,7 +250,6 @@ private:
 	// These for arguments
 	boost::pool<> m_bool_mem = boost::pool<>(sizeof(bool));
 	boost::pool<> m_size_t_double_mem = boost::pool<>(sizeof(size_t));
-	boost::pool<> m_singleton_info_mem = boost::pool<>(sizeof(MemorySingletonMetaInfo));
 	boost::pool<> m_arg_mem = boost::pool<>(sizeof(Argument));
 	
 	template<object_type T>
@@ -344,13 +282,6 @@ private:
 	// Private Variables
 private:
 	std::set<void*> m_allocated_blocks;
-	std::unordered_map<size_t, void*> m_singleton_mem_map;
-
-	std::unordered_map<size_t, void*> m_object_mem_map;
-	std::unordered_map<void*, size_t> m_object_name_map;
-	
-	std::unordered_map<void*, MemoryObjectMetaInfo*> m_object_meta_inf_map;
-	std::unordered_map<void*, MemorySingletonMetaInfo*> m_singleton_meta_inf_map;
 
 };
 
