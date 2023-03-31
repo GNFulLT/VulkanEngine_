@@ -5,9 +5,13 @@
 #include "../string/string_types.h"
 #include "../typedefs.h"
 #include <unordered_map>
+#include <concepts>
+
+
 
 class Property;
 class MemoryManager;
+class ObjectDB;
 
 #define OBJECT_NAME_MAX_LEN 32
 
@@ -62,6 +66,7 @@ protected:
 
 private:
 	friend class MemoryManager;
+	friend class ObjectDB;
 	_INLINE_ void set_name(const char* name)
 	{
 		m_object_name.set_str(name);
@@ -77,5 +82,8 @@ private:
 	StringName m_memory_align_name;
 	ObjectID m_instance_id;
 };
+
+template<typename T>
+concept object_type = std::convertible_to<T*, Object*>;
 
 #endif

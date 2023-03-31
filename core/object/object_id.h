@@ -3,6 +3,8 @@
 
 #include "../typedefs.h"
 
+class ObjectDB;
+
 // RTTI Helper
 class ObjectID
 {
@@ -24,6 +26,7 @@ public:
 	_INLINE_ explicit ObjectID(const int64_t pId) noexcept { m_id = pId; }
 
 private:
+	friend class ObjectDB;
 	uint64_t m_id = 0;
 };
 
