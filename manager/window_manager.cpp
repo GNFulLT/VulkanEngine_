@@ -112,10 +112,15 @@ void WindowManager::rebuild_window()
 
 	auto dock_id_left = ImGui::DockBuilderSplitNode(dock_id_left_menu, ImGuiDir_Left,
 		0.2f, nullptr, &dock_id_middle);
+	
+	
+	auto dock_id_bottom = ImGui::DockBuilderSplitNode(dock_id_middle, ImGuiDir_Down,
+		0.2f, nullptr, &dock_id_middle);
 
 	ImGui::DockBuilderDockWindow("Dear ImGui Demo", dock_id_left);
 	ImGui::DockBuilderDockWindow("Text Editor", dock_id_rigt_menu);
 	ImGui::DockBuilderDockWindow("Scene", dock_id_middle);
+	ImGui::DockBuilderDockWindow("Content Browser", dock_id_bottom);
 
 	ImGui::DockBuilderFinish(m_dock_id);
 }
@@ -291,26 +296,7 @@ void WindowManager::on_created()
 	ImGui::DockSpace(m_dock_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_::ImGuiDockNodeFlags_NoResize
 		| ImGuiDockNodeFlags_PassthruCentralNode);
 
-	ImGui::DockBuilderRemoveNode(m_dock_id);
-
-	ImGui::DockBuilderAddNode(m_dock_id, ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_DockSpace);
-	ImGui::DockBuilderSetNodeSize(m_dock_id, ImGui::GetMainViewport()->Size);
-
-	ImGuiID dock_id_left_menu;
-
-	auto dock_id_rigt_menu = ImGui::DockBuilderSplitNode(m_dock_id, ImGuiDir_Right,
-		0.3f, nullptr, &dock_id_left_menu);
-
-	ImGuiID dock_id_middle;
-
-	auto dock_id_left = ImGui::DockBuilderSplitNode(dock_id_left_menu, ImGuiDir_Left,
-		0.2f, nullptr, &dock_id_middle);
-
-	ImGui::DockBuilderDockWindow("Dear ImGui Demo", dock_id_left);
-	ImGui::DockBuilderDockWindow("Text Editor", dock_id_rigt_menu);
-	ImGui::DockBuilderDockWindow("Scene", dock_id_middle);
-
-	ImGui::DockBuilderFinish(m_dock_id);
+	rebuild_window();
 
 	ImGui::End();
 	

@@ -10,6 +10,7 @@
 #include "gui/windows/debug_window.h"
 #include "gui/windows/text_editor_window.h"
 #include "gui/windows/scene_window.h"
+#include "gui/windows/content_browser_window.h"
 
 #include <stack>
 
@@ -104,6 +105,7 @@ int main()
 
         TextEditorWindow* window;
         SceneWindow* scene_window;
+        ContentBrowserWindow* browser_window;
 
         window_manager->create_window("Text Editor",&window);
         window_manager->register_window(window,false);
@@ -111,6 +113,9 @@ int main()
         
         window_manager->create_window("Scene", &scene_window, memory_manager->new_object<RenderScene>("SceneRenderer"));
         window_manager->register_window(scene_window);
+
+        window_manager->create_window("Content Browser", &browser_window);
+        window_manager->register_window(browser_window);
 
         //auto langDef = TextEditor::LanguageDefinition::GLSL();
         //window->SetLanguageDefinition(langDef);
