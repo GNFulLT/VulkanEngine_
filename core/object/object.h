@@ -12,7 +12,7 @@
 class Property;
 class MemoryManager;
 class ObjectDB;
-
+class ResourceManager;
 #define OBJECT_NAME_MAX_LEN 32
 
 #define OBJECT_DEF(m_class,m_inherited)  \
@@ -72,6 +72,7 @@ protected:
 private:
 	friend class MemoryManager;
 	friend class ObjectDB;
+	friend class ResourceManager;
 	_INLINE_ void set_name(const char* name)
 	{
 		m_object_name.set_str(name);

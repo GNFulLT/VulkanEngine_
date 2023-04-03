@@ -1,5 +1,10 @@
 #include "resource.h"
 
+void Resource::load()
+{
+	m_loaded = load_impl();
+}
+
 void Resource::register_owner(Object* owner)
 {
 	//X TODO : Mutex needed

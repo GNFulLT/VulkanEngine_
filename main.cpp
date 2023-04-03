@@ -6,6 +6,7 @@
 #include "manager/rendering/render_device.h"
 #include "manager/thread_pool_manager.h"
 #include "manager/timer_manager.h"
+#include "manager/resource_manager.h"
 
 #include "gui/windows/debug_window.h"
 #include "gui/windows/text_editor_window.h"
@@ -20,6 +21,7 @@ ThreadPoolManager* thread_pool_manager;
 WindowManager* window_manager;
 RenderDevice* render_device;
 TimerManager* timer_manager;
+ResourceManager* resource_manager;
 int main()
 {
     mi_stats_reset();  // ignore earlier allocations
@@ -66,8 +68,15 @@ int main()
 
     inited = render_device->init();
    
-
     manager_stack.push(render_device);
+
+    resource_manager = memory_manager->create_singleton_object<ResourceManager>("ResourceManager");
+
+    ResourceManager::set_singleton(resource_manager);
+    
+    inited = resource_manager->init();
+
+    manager_stack.push(resource_manager);    
 
     if (inited)
     {
