@@ -51,6 +51,11 @@ public:
 
 	}
 
+	_INLINE_ ObjectID get_object_id() const noexcept
+	{
+		return m_instance_id;
+	}
+
 	_INLINE_ bool operator==(const Object& pObj) const { return m_instance_id == pObj.m_instance_id; }
 	_INLINE_ bool operator!=(const Object& pObj) const { return m_instance_id != pObj.m_instance_id; }
 	_INLINE_ bool operator<(const Object& pObj) const { return m_instance_id < pObj.m_instance_id; }
