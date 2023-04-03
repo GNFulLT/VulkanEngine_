@@ -11,7 +11,7 @@
 #include <set>
 
 #include "../../core/typedefs.h"
-
+#include "../../plugin/pinclude/basic_shared_types.h"
 
 struct QueueCreateInf
 {
@@ -73,8 +73,6 @@ struct VulkanTexture {
 	VkImageView imageView;
 };
 
-
-
 _F_INLINE_ uint32_t find_memory_type(VkPhysicalDevice device, uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
 
@@ -89,6 +87,50 @@ _F_INLINE_ uint32_t find_memory_type(VkPhysicalDevice device, uint32_t typeFilte
 
 	return (uint32_t)-1;
 }
+
+
+_F_INLINE_ bool create_buffer(VkDevice device,VkPhysicalDevice phyDev,VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+	VkBufferCreateInfo bufferInfo{};
+	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferInfo.size = size;
+	bufferInfo.usage = usage;
+	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
+		return false;
+	}
+
+	VkMemoryRequirements memRequirements;
+	vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
+
+	VkMemoryAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	allocInfo.allocationSize = memRequirements.size;
+	allocInfo.memoryTypeIndex = find_memory_type(phyDev,memRequirements.memoryTypeBits, properties);
+
+	if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+		return false;
+	}
+
+	vkBindBufferMemory(device, buffer, bufferMemory, 0);
+}
+
+//X TODO: NOT INLINE
+_F_INLINE_ VkFormat IMAGE_FORMAT_TO_VK_FORMAT(IMAGE_FORMAT format)
+{
+	switch (format)
+	{
+	case IMAGE_FORMAT_R8G8B8A8_FLOAT:
+		return VK_FORMAT_R8G8B8A8_SNORM;
+	case IMAGE_FORMAT_R8G8B8A8_UNSIGNED_BYTE:
+		return VK_FORMAT_R8G8B8A8_UINT;
+	case IMAGE_FORMAT_R8G8B8_FLOAT:
+		return VK_FORMAT_R8G8B8_SNORM;
+	case IMAGE_FORMAT_R8G8B8_UNSIGNED_BYTE:
+		return VK_FORMAT_R8G8B8_UINT;
+	}
+}
+
 
 
 _INLINE_ bool create_image_view(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView* imageView, VkImageViewType viewType, uint32_t layerCount, uint32_t mipLevels)
