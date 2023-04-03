@@ -10,6 +10,8 @@ public:
 	virtual ~ImageLoader() = default;
 
 	virtual GNF_Image* load(const String& path) = 0;
+
+	virtual void unload(GNF_Image* img) = 0;
 private:
 };
 
