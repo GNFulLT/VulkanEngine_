@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(VulkanEngine LANGUAGES CXX)
+project(VulkanEngine LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
@@ -32,7 +31,7 @@ file(GLOB VulkanEngine_SRC
 
 
 
-add_executable(VulkanEngine ${VulkanEngine_SRC})
+add_executable(VulkanEngine ${VulkanEngine_SRC} "core/stb_image.h")
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/glfw)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/spdlog)

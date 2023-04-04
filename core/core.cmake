@@ -4,6 +4,8 @@ file(GLOB VulkanEngine_CORE_SRC
 	"core/scope.h"
 	"core/typedefs.h"
 	"core/vec2.h"
+	"core/stb_image.h"
+	"core/stb_image.c"
 	"core/version.h"
 	"core/io/io_utils.h"
 	"core/io/logger.h"
