@@ -6,6 +6,8 @@ file(GLOB VulkanEngine_MANAGER_SRC
 	"manager/logger_manager.cpp"
 	"manager/window_manager.h"
 	"manager/window_manager.cpp"
+	"manager/resource_manager.cpp"
+	"manager/resource_manager.h"
 	"manager/timer_manager.h"
 	"manager/rendering/render_device.h"
 	"manager/rendering/render_device.cpp"
