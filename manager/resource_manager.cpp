@@ -35,20 +35,14 @@ Resource* ResourceManager::create_image_resource(const String& resourceKey, cons
 		{
 			imageLoader = loader->second;
 		}
-	}
-
-	auto img = imageLoader->load(resourcePath);
-	
-	VulkanImage* vimg = MemoryManager::get_singleton()->new_object<VulkanImage>(resourceKey,img);
+	}	
+	VulkanImage* vimg = MemoryManager::get_singleton()->new_object<VulkanImage>(resourceKey, imageLoader);
 	//X TODO : LOG
 	if (vimg->is_failed())
 	{
 		MemoryManager::get_singleton()->destroy_object(vimg);
-		imageLoader->unload(img);
 		return nullptr;
 	}
-
-	imageLoader->unload(img);
 
 	vimg->register_owner(who);
 	vimg->set_name(resourceKey.c_str());
