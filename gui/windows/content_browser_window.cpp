@@ -6,6 +6,12 @@
 #include "../../core/typedefs.h"
 #include "../../core/string/string_types.h"
 #include "../../core/io/io_utils.h"
+#include "../../manager/resource_manager.h"
+
+ContentBrowserWindow::~ContentBrowserWindow()
+{
+	ResourceManager::get_singleton()->destroy_resource(m_textIcon);
+}
 
 void ContentBrowserWindow::render()
 {
@@ -28,6 +34,13 @@ void ContentBrowserWindow::render()
 		ImGui::NextColumn();
 	}
 	ImGui::LabelText("Hello", "Hello");
+}
+
+bool ContentBrowserWindow::on_created()
+{
+	m_textIcon = ResourceManager::get_singleton()->create_image_resource("text_image", "./text_icon.png");
+	m_textIcon->load();
+	return m_textIcon->is_loaded();
 }
 
 bool ContentBrowserWindow::set_path(const String& path)

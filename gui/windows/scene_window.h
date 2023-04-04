@@ -3,7 +3,6 @@
 
 #include "../window.h"
 #include "../../manager/rendering/render_scene.h"
-#include <boost/signals2.hpp>
 
 class SceneWindow : public Window
 {
@@ -23,9 +22,6 @@ public:
 
 	void on_size_changed() override final;
 private:
-	void on_device_destroyed(const bool& quitting);
-
-	boost::signals2::connection m_quittingConnection;
 private:
 	RenderScene* p_render_scene;
 };

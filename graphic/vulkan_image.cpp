@@ -26,7 +26,7 @@ bool VulkanImage::load_impl()
 		return false;
 	}
 
-	if (create_image_view(RenderDevice::get_singleton()->get_render_device().logicalDevice, m_image, IMAGE_FORMAT_TO_VK_FORMAT(image->format), VK_IMAGE_ASPECT_COLOR_BIT,
+	if (!create_image_view(RenderDevice::get_singleton()->get_render_device().logicalDevice, m_image, IMAGE_FORMAT_TO_VK_FORMAT(image->format), VK_IMAGE_ASPECT_COLOR_BIT,
 		&m_imageView, VK_IMAGE_VIEW_TYPE_2D, 1, 1))
 	{
 		vkDestroyImage(RenderDevice::get_singleton()->get_render_device().logicalDevice, m_image, nullptr);
@@ -40,7 +40,7 @@ bool VulkanImage::load_impl()
 	//X TODO: The sum of the components of each image_format type is 32
 	VkDeviceSize imageSize = image->width * image->width * 4;
 
-	if (create_buffer(RenderDevice::get_singleton()->get_render_device().logicalDevice, RenderDevice::get_singleton()->get_render_device().physicalDev.physicalDev,
+	if (!create_buffer(RenderDevice::get_singleton()->get_render_device().logicalDevice, RenderDevice::get_singleton()->get_render_device().physicalDev.physicalDev,
 		imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 		stagingBuffer, stagingBufferMemory))
 	{

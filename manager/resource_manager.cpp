@@ -37,14 +37,10 @@ Resource* ResourceManager::create_image_resource(const String& resourceKey, cons
 		}
 	}	
 	VulkanImage* vimg = MemoryManager::get_singleton()->new_object<VulkanImage>(resourceKey, imageLoader);
-	//X TODO : LOG
-	if (vimg->is_failed())
-	{
-		MemoryManager::get_singleton()->destroy_object(vimg);
-		return nullptr;
-	}
-
-	vimg->register_owner(who);
+	
+	if(who != nullptr)
+		vimg->register_owner(who);
+	
 	vimg->set_name(resourceKey.c_str());
 	vimg->m_path = resourcePath;
 
@@ -64,7 +60,6 @@ void ResourceManager::destroy_resource(Resource* res)
 
 	m_resourceKeysMap.erase(keyHash);
 	m_resourcePathMap.erase(pathHash);
-
 
 	MemoryManager::get_singleton()->destroy_object(res);
 }

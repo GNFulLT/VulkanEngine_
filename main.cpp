@@ -56,11 +56,10 @@ int main()
 
     window_manager = memory_manager->create_singleton_object<WindowManager>("WindowManager");
 
-    manager_stack.push(window_manager);
+
+    WindowManager::set_singleton(window_manager);
 
     bool inited = window_manager->init();
-    
-    WindowManager::set_singleton(window_manager);
 
     render_device = memory_manager->create_singleton_object<RenderDevice>("RenderDevice");
 
@@ -77,6 +76,7 @@ int main()
     inited = resource_manager->init();
 
     manager_stack.push(resource_manager);    
+    manager_stack.push(window_manager);
 
     if (inited)
     {

@@ -3,6 +3,7 @@
 
 #include <boost/filesystem.hpp>
 #include "../window.h"
+#include "../../core/io/resource.h"
 
 class ContentBrowserWindow : public Window
 {
@@ -10,14 +11,15 @@ class ContentBrowserWindow : public Window
 public:
 	ContentBrowserWindow(const String& name) : Window(name)
 	{}
-
+	~ContentBrowserWindow();
 	virtual void render() override;
-	
+	virtual bool on_created() override final;
 	bool set_path(const String& path);
 	
 
 private:
 	boost::filesystem::path m_path = boost::filesystem::current_path();
+	Resource* m_textIcon = nullptr;
 };
 
 

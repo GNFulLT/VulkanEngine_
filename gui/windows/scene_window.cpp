@@ -8,7 +8,6 @@
 
 SceneWindow::SceneWindow(String name, RenderScene* pRenderScene) : Window(name), p_render_scene(pRenderScene)
 {
-	m_quittingConnection = RenderDevice::get_singleton()->get_quitting()->subscribe_changed_event(boost::bind(&SceneWindow::on_device_destroyed,this,boost::placeholders::_1));
 }
 
 void SceneWindow::render()
@@ -43,15 +42,6 @@ void SceneWindow::on_size_changed()
 void SceneWindow::render_ex(VkQueue queue,VkCommandBuffer buff,VkFence fence)
 {
 	p_render_scene->render_ex(queue,buff,fence);
-}
-
-void SceneWindow::on_device_destroyed(const bool& quitting)
-{
-	if (quitting)
-	{
-		MemoryManager::get_singleton()->destroy_object(p_render_scene);
-		p_render_scene = nullptr;
-	}
 }
 
 SceneWindow::~SceneWindow()

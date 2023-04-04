@@ -113,6 +113,8 @@ _F_INLINE_ bool create_buffer(VkDevice device,VkPhysicalDevice phyDev,VkDeviceSi
 	}
 
 	vkBindBufferMemory(device, buffer, bufferMemory, 0);
+
+	return true;
 }
 
 //X TODO: NOT INLINE
