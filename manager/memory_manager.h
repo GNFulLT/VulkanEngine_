@@ -83,6 +83,52 @@ public:
 		return oPtr;
 	}
 
+	template<typename Obj>
+	_IMP_RETURN_ _INLINE_ Obj* fnew_c()
+	{
+		void* ptr = mi_malloc(sizeof(Obj));
+
+		m_allocated_blocks.insert(ptr);
+
+		return (Obj*)ptr;
+	}
+	
+	template<typename Obj>
+	_INLINE_ void fdel_c(Obj* ptr)
+	{
+		// X TODO : NEED HANDLE
+		/*assert(m_allocated_blocks.find(ptr) != m_allocated_blocks.end());
+		assert(m_object_name_map.find(ptr) != m_object_name_map.end());*/
+		m_allocated_blocks.erase(ptr);
+
+		mi_free(ptr);
+	}
+
+	template<typename Obj, typename... Args>
+	_IMP_RETURN_ _INLINE_ Obj* fnew(Args... args)
+	{
+		void* ptr = mi_malloc(sizeof(Obj));
+
+		m_allocated_blocks.insert(ptr);
+
+		Obj* oPtr = new (ptr) Obj(args...);
+
+		return oPtr;
+	}
+	
+	template<typename Obj>
+	_INLINE_ void fdel(Obj* ptr)
+	{
+		// X TODO : NEED HANDLE
+		/*assert(m_allocated_blocks.find(ptr) != m_allocated_blocks.end());
+		assert(m_object_name_map.find(ptr) != m_object_name_map.end());*/
+		m_allocated_blocks.erase(ptr);
+
+		ptr->~Obj();
+		mi_free(ptr);
+
+	}
+
 	template<object_type Obj, typename... Args>
 	_F_INLINE_ Obj* create_singleton_object(const String& class_name,Args... args)
 	{
