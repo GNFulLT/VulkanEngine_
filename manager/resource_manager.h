@@ -17,7 +17,10 @@ public:
 	ResourceManager();
 
 
-	Resource* create_image_resource(const String& resourceKey,const String& resourcePath, Object* who = nullptr ,const String& loaderName = "");
+	Resource* create_image_resource(const String& resourceKey,const String& resourcePath, Object* who = nullptr , RESOURCE_USAGE usage = RESOURCE_USAGE_NILL,const String& loaderName = "");
+	
+	//X Editor Usage added automatically
+	Resource* create_editor_image_resource(const String& resourceKey, const String& resourcePath, Object* who = nullptr, RESOURCE_USAGE usage = RESOURCE_USAGE_NILL, const String& loaderName = "");
 	
 	void destroy_resource(Resource* res);
 private:
