@@ -10,7 +10,9 @@ class ResourceManager;
 
 enum RESOURCE_USAGE
 {
-	RESOURCE_USAGE_SYSTEM // System Resource
+	RESOURCE_USAGE_NILL = 0 << 0,
+	RESOURCE_USAGE_SYSTEM = 1 << 1, // System Resource
+	RESOURCE_USAGE_EDITOR = 1 << 2
 };
 
 enum RESOURCE_TYPE
