@@ -14,7 +14,7 @@ class VulkanImage : public Resource
 public:
 	VulkanImage(ImageLoader* loader);
 	
-	~VulkanImage();
+	virtual ~VulkanImage();
 
 	_F_INLINE_ bool is_failed() const noexcept
 	{
@@ -23,8 +23,8 @@ public:
 	
 	RESOURCE_TYPE get_resource_type() const noexcept override final;
 protected:
-	bool load_impl() override final;
-private:
+	virtual bool load_impl() override;
+protected:
 	VkImage m_image = nullptr;
 	VkDeviceMemory m_imageMemory = nullptr;
 	VkImageView m_imageView = nullptr;
