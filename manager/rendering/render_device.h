@@ -132,6 +132,10 @@ public:
 	
 	void render_ui(tf::Subflow& subflow);
 
+	VkCommandBuffer begin_single_time_command();
+
+	void finish_exec_single_time_command(VkCommandBuffer buff);
+
 	_INLINE_ VulkanRenderDevice& get_render_device()
 	{
 		return m_renderDevice;

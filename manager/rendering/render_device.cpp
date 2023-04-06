@@ -883,37 +883,6 @@ bool RenderDevice::init_vk_logical_device()
 
 		m_renderDevice.mainQueueIndex = 0;
 
-
-		//queueCreateInf.add_create_info()
-		//// Queues
-		//float mainPriorities = 1.f;
-
-		//VkDeviceQueueCreateInfo mainQueueInfo = {};
-		//mainQueueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		//mainQueueInfo.pNext = nullptr;
-		//mainQueueInfo.queueFamilyIndex = m_renderDevice.mainQueueFamilyIndex;
-		//mainQueueInfo.queueCount = 1;
-		//mainQueueInfo.pQueuePriorities = &mainPriorities;
-
-
-		//float presentPriorities = 1.f;
-
-		//VkDeviceQueueCreateInfo presentQueueInfo = {};
-		//presentQueueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		//
-		//presentQueueInfo.pNext = nullptr;
-		//presentQueueInfo.queueFamilyIndex = m_renderDevice.presentQueueFamilyIndex;
-		//presentQueueInfo.queueCount = 1;
-		//presentQueueInfo.pQueuePriorities = &presentPriorities;
-		//
-		//float mainPriorities = 1.f;
-
-		//
-
-		//std::vector< VkDeviceQueueCreateInfo> queueInfos;
-		//queueInfos.push_back(mainQueueInfo);
-		//queueInfos.push_back(presentQueueInfo);
-
 		std::vector<VkLayerProperties> allLayerProps;
 		if (!get_all_device_layers(m_renderDevice.physicalDev.physicalDev, allLayerProps))
 			return false;
@@ -1308,10 +1277,34 @@ bool RenderDevice::init_vk_syncs()
 	if (res != VK_SUCCESS)
 		return false;
 
-	fCreateInfo.flags = 0; // Signaled
+	fCreateInfo.flags = 0; // unsignaled
 	res = vkCreateFence(m_renderDevice.logicalDevice, &fCreateInfo, nullptr, &m_renderDevice.presentQueueFinishedFence);
 	if (res != VK_SUCCESS)
 		return false;
 	return true;
 }
 
+//X TODO : NEED CHANGE COMMAND BUFFERS
+
+VkCommandBuffer RenderDevice::begin_single_time_command()
+{
+
+	vkResetCommandPool(m_renderDevice.logicalDevice, m_renderDevice.mainQueueCommandPools[0], 0);
+	vkResetFences(m_renderDevice.logicalDevice, 1, &m_renderDevice.presentQueueFinishedFence);
+	vkBeginCommandBuffer(m_renderDevice.pMainCommandBuffer, this->get_main_begin_inf());
+	return m_renderDevice.pMainCommandBuffer;
+}
+
+void RenderDevice::finish_exec_single_time_command(VkCommandBuffer buff)
+{
+	vkEndCommandBuffer(m_renderDevice.pMainCommandBuffer);
+	VkSubmitInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	info.pNext = nullptr;
+	info.commandBufferCount = 1;
+	info.pCommandBuffers = &buff;
+	info.signalSemaphoreCount = 0;
+	info.waitSemaphoreCount = 0;
+	vkQueueSubmit(m_renderDevice.mainQueue, 1,&info,nullptr);
+	vkQueueWaitIdle(m_renderDevice.mainQueue);
+}
