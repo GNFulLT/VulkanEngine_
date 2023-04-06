@@ -17,6 +17,7 @@ file(GLOB VulkanEngine_CORE_SRC
 	"core/io/image_loader.h"
 	"core/io/base_image_loader.h"
 	"core/io/base_image_loader.cpp"
+	"core/io/file_type.h"
 	"core/object/object.h"
 	"core/object/object_id.h"
 	"core/object/variant.h"
