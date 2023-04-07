@@ -49,7 +49,28 @@ void ImGuiDraw::init()
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
-	ImGui::StyleColorsLight();
+	ImGui::StyleColorsDark();
+	auto& style = ImGui::GetStyle();
+	//!: Styles
+	style.ScrollbarSize = 8.f;
+	style.WindowRounding = 3.f;
+	//!: Colors
+	auto colors = style.Colors;
+	colors[ImGuiCol_::ImGuiCol_WindowBg] =  ImVec4(38.f / 255.f, 43.f / 255.f, 58.f / 255.f, 1.f);
+	colors[ImGuiCol_::ImGuiCol_TitleBg] = ImVec4(51.f / 255.f, 57.f / 255.f, 79.f / 255.f, 1.f);
+	colors[ImGuiCol_::ImGuiCol_TitleBgActive] = ImVec4(51.f / 255.f, 57.f / 255.f, 79.f / 255.f, 1.f);
+	colors[ImGuiCol_::ImGuiCol_MenuBarBg] = ImVec4(32.f / 255.f, 36.f / 255.f, 48.f / 255.f, 1.f);
+	colors[ImGuiCol_::ImGuiCol_CheckMark] = ImVec4(1.f, 1.f, 1.f, 1.f);
+	colors[ImGuiCol_::ImGuiCol_Border] = ImVec4(1.f, 1.f, 1.f, 0.f);
+
+	/*colors[ImGuiCol_::ImGuiCol_FrameBg] = ImVec4(1.f, 1.f, 1.f, 0.f);
+	colors[ImGuiCol_::ImGuiCol_FrameBgHovered] = ImVec4(1.f, 1.f, 1.f, 0.f);
+	colors[ImGuiCol_::ImGuiCol_FrameBgActive] = ImVec4(1.f, 1.f, 1.f, 0.f);*/
+
+
+	style.WindowBorderSize = 0;
+	style.WindowRounding = 0;
+	style.WindowMenuButtonPosition = ImGuiDir_::ImGuiDir_None;
 
 	auto r = ImGui_ImplGlfw_InitForVulkan((WindowManager::get_singleton())->get_window(), true);
 

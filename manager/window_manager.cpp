@@ -131,17 +131,19 @@ void WindowManager::pre_render()
 
 	if (ImGui::BeginMainMenuBar())
 	{
+		
+		
 		if (ImGui::BeginMenu("View"))
 		{
-			for (auto& pair : m_registeredWindows)
+			for (int i = 0; i < m_registeredWindowsList.size()-1; i++)
 			{
-				ImGui::Checkbox(pair.second.second->get_name().c_str(), &pair.second.first);
+				ImGui::Checkbox(m_registeredWindowsList[i]->get_name().c_str(), &m_registeredWindows[m_registeredWindowsList[i]->get_name()].first);
+				ImGui::Separator();
 			}
+			ImGui::Checkbox(m_registeredWindowsList[m_registeredWindowsList.size() - 1]->get_name().c_str(), &m_registeredWindows[m_registeredWindowsList[m_registeredWindowsList.size() - 1]->get_name()].first);
 
 			ImGui::EndMenu();
 		}
-
-
 		ImGui::EndMainMenuBar();
 	}
 
@@ -187,20 +189,28 @@ void WindowManager::render()
 	// Main Menu
 	if (ImGui::BeginMainMenuBar())
 	{
+		ImVec4 col = { 0,0,0,0 };
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, col);
+		ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, col);
+		ImGui::PushStyleColor(ImGuiCol_FrameBgActive, col);
 		if (ImGui::BeginMenu("View"))
 		{
-			for (auto& pair : m_registeredWindows)
+			for (int i = 0; i < m_registeredWindowsList.size() - 1; i++)
 			{
-				if (ImGui::Checkbox(pair.second.second->get_name().c_str(), &pair.second.first))
+				if (ImGui::Checkbox(m_registeredWindowsList[i]->get_name().c_str(), &m_registeredWindows[m_registeredWindowsList[i]->get_name()].first))
 				{
 					needValidation = true;
 				}
-			
+				ImGui::Separator();
+			}
+			if (ImGui::Checkbox(m_registeredWindowsList[m_registeredWindowsList.size() - 1]->get_name().c_str(), &m_registeredWindows[m_registeredWindowsList[m_registeredWindowsList.size() - 1]->get_name()].first))
+			{
+				needValidation = true;
 			}
 
 			ImGui::EndMenu();
 		}
-
+		ImGui::PopStyleColor(3);
 
 		ImGui::EndMainMenuBar();
 	}

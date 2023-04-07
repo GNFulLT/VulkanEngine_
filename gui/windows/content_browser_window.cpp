@@ -21,12 +21,16 @@ ContentBrowserWindow::~ContentBrowserWindow()
 void ContentBrowserWindow::render()
 {
 	using namespace boost::filesystem;
-	static float padding = 10.f;
+	static float padding = 15.f;
 	static float btn_size = 64.f;
 	float cell_size = padding + btn_size;
 	int column_count = m_size.get()->x / cell_size;
 	if (column_count < 1)
 		column_count = 1;
+
+	ImGui::PushStyleColor(ImGuiCol_Button, { 0,0,0,0.3 });
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0,0,0,0.6 });
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0,0,0,0.7});
 
 	if (ImGui::Button("<<"))
 	{
@@ -51,12 +55,18 @@ void ContentBrowserWindow::render()
 		strStack.pop();
 	}
 
+	ImGui::PopStyleColor(3);
+
 	ImGui::Columns(column_count, 0, false);
 
 	for (directory_iterator itr(m_path); itr != directory_iterator(); ++itr)
 	{
 		auto ex = file_name_to_file_type(itr->path());
+		//X TODO : Needs to get from a global manager
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0.2f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0.3f));
+
 		switch (ex)
 		{
 		case FILE_TYPE_UNKNOWN:
@@ -73,8 +83,15 @@ void ContentBrowserWindow::render()
 			break;
 		}
 		//ImGui::Button(itr->path().filename().string().c_str(),{btn_size,btn_size});
-		ImGui::PopStyleColor();
-		ImGui::TextWrapped(itr->path().filename().string().c_str());
+		ImGui::PopStyleColor(3);
+		auto str = itr->path().filename().string();
+		auto textWidth = ImGui::CalcTextSize(str.c_str()).x;
+
+		auto textBegin = ImGui::GetCursorPosX() + ((btn_size - textWidth) * 0.5f);
+		if(textBegin >= ImGui::GetCursorPosX())
+			ImGui::SetCursorPosX(textBegin);
+
+		ImGui::Text(str.c_str());
 		ImGui::NextColumn();
 	}
 }
