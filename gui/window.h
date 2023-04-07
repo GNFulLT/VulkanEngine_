@@ -6,6 +6,7 @@
 #include "../core/object/object.h"
 #include "../config/config_property.h"
 #include "../imgui/imgui.h"
+#include "../core/string/string_utils.h"
 class WindowManager;
 
 
@@ -16,6 +17,7 @@ public:
 	Window(const String& name) : m_size(this,GNF_UVec2{.x=0,.y=0}, "Size")
 	{
 		m_windowName = name;
+		m_id = hash_string(name);
 	}
 
 	virtual void on_size_changed();
@@ -43,12 +45,12 @@ public:
 		return true;
 	}
 
-	_INLINE_ const String& get_name()
+	_INLINE_ const String& get_name() const noexcept
 	{
 		return m_windowName;
 	}
 
-	_INLINE_ unsigned int get_window_id()
+	_INLINE_ size_t get_window_id() const noexcept
 	{
 		return m_id;
 	}
@@ -62,7 +64,7 @@ protected:
 	ConfigProperty<GNF_UVec2> m_size;
 private:
 	friend class WindowManager;
-	unsigned int m_id;
+	size_t m_id;
 	String m_windowName;
 };
 
