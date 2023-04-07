@@ -17,6 +17,11 @@ constexpr inline static std::string_view FONT_FOLDER_FULL_PATH = join_v<RESOURCE
 
 // FILES
 
+constexpr inline static std::string_view TEXT_ICON = "text_icon.png";
+constexpr inline static std::string_view FOLDER_ICON = "folder_icon.png";
+
+constexpr inline static std::string_view TEXT_ICON_PATH = join_v<ASSETS_FOLDER, TEXT_ICON>;
+constexpr inline static std::string_view FOLDER_ICON_PATH = join_v<ASSETS_FOLDER, FOLDER_ICON>;
 // EMBEDDED FILES
 constexpr inline static std::string_view EMBEDDED_FILE_PATH = ":/";
 constexpr inline static std::string_view SPLASH_SCREEN_PNG = "splashscreen.png";
