@@ -10,7 +10,7 @@
 #include "../../manager/resource_manager.h"
 #include "../../graphic/editor_image.h"
 #include "../../core/io/file_type.h"
-
+#include "../../core/folders.h"
 ContentBrowserWindow::~ContentBrowserWindow()
 {
 	ResourceManager::get_singleton()->destroy_resource(m_textIcon);
@@ -81,12 +81,12 @@ void ContentBrowserWindow::render()
 
 bool ContentBrowserWindow::on_created()
 {
-	m_textIcon = ResourceManager::get_singleton()->create_editor_image_resource("text_icon", "./text_icon.png",this,
+	m_textIcon = ResourceManager::get_singleton()->create_editor_image_resource("TEXT_ICON", &TEXT_ICON_PATH[0], this,
 		(RESOURCE_USAGE)(RESOURCE_USAGE_SYSTEM | RESOURCE_USAGE_EDITOR));
 	m_textIcon->load();
 
 	//X TODO : NEED TO BE PARALLEL
-	m_folderIcon = ResourceManager::get_singleton()->create_editor_image_resource("folder_icon", "./folder_icon.png", this,
+	m_folderIcon = ResourceManager::get_singleton()->create_editor_image_resource("FOLDER_ICON", &FOLDER_ICON_PATH[0], this,
 		(RESOURCE_USAGE)(RESOURCE_USAGE_SYSTEM | RESOURCE_USAGE_EDITOR));
 	m_folderIcon->load();
 	return m_textIcon->is_loaded() && m_folderIcon->is_loaded();
