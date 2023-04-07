@@ -130,8 +130,8 @@ RenderDevice::~RenderDevice()
 
 bool RenderDevice::init()
 {
-	m_instance.format.format = VK_FORMAT_B8G8R8A8_SRGB;
-	m_instance.format.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+	m_instance.format.format =	VK_FORMAT_B8G8R8A8_UNORM;
+	m_instance.format.colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
 
 	bool succeeded = true;
 	succeeded = init_vk_instance();
