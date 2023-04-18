@@ -91,7 +91,8 @@ RenderDevice::~RenderDevice()
 			vkDestroyImageView(m_renderDevice.logicalDevice, m_swapchain.swapchainImageViews[i], nullptr);
 		}
 
-		vkDestroyRenderPass(m_renderDevice.logicalDevice, m_swapchain.renderPass,nullptr);
+		m_swapchain.renderPass.destroy(m_renderDevice.logicalDevice);
+		//vkDestroyRenderPass(m_renderDevice.logicalDevice, m_swapchain.renderPass,nullptr);
 		if (m_swapchain.swapchain != nullptr)
 			vkDestroySwapchainKHR(m_renderDevice.logicalDevice, m_swapchain.swapchain, nullptr);
 
@@ -394,7 +395,7 @@ bool RenderDevice::init_command_buffers()
 		inf.commandBufferCount = 2;
 		inf.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		inf.pNext = nullptr;
-		inf.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+		inf.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		inf.commandPool = m_renderDevice.mainQueueCommandPools[i];
 		m_renderDevice.commandBuffers.emplace(i, std::vector<VkCommandBuffer>());
 		m_renderDevice.commandBuffers[i].resize(2);
@@ -522,44 +523,7 @@ void RenderDevice::pre_render()
 
 bool RenderDevice::render_things(tf::Subflow& subflow)
 {
-
-	auto updt = subflow.emplace([n = this, imguiDraw = imguiDraw](tf::Subflow& subflow) {
-		n->render_ui(subflow);
-		});
-
-	auto endUpdt = subflow.emplace([n = this, imguiDraw = imguiDraw]() {
-
-		imguiDraw->end();
-
-		});
-
-	auto fillPhase = subflow.emplace([n = this]() {
-
-		auto cmd = n->get_main_cmd();
-
-		vkBeginCommandBuffer(cmd, n->get_main_begin_inf());
-
-
-		vkCmdBeginRenderPass(cmd, n->get_main_renderpass_begin_inf(), VK_SUBPASS_CONTENTS_INLINE);
-
-		n->fillCmd(cmd);
-		// After filling cmd start to execute
-		vkCmdEndRenderPass(cmd);
-		vkEndCommandBuffer(cmd);
-
-		vkQueueSubmit(n->get_render_device().mainQueue, 1, n->get_main_submit_info(1, &cmd), n->get_render_device().mainQueueFinishedFence);
-
-		});
-
-#ifdef _DEBUG
-	updt.name("Render UI");
-	endUpdt.name("FinishCollectingImGuiData");
-	fillPhase.name("Fill Buffer");
-#endif
-	updt.precede(endUpdt);
-	endUpdt.precede(fillPhase);
-
-	return m_canContinue;
+	return true;
 }
 
 
@@ -572,12 +536,12 @@ void RenderDevice::fill_and_execute_cmd()
 {
 	auto sss = vkBeginCommandBuffer(m_renderDevice.pMainCommandBuffer, this->get_main_begin_inf());
 
-	auto inf = this->get_main_renderpass_begin_inf();
-	vkCmdBeginRenderPass(m_renderDevice.pMainCommandBuffer, inf, VK_SUBPASS_CONTENTS_INLINE);
-
+	//auto inf = this->get_main_renderpass_begin_inf();
+	//vkCmdBeginRenderPass(m_renderDevice.pMainCommandBuffer, inf, VK_SUBPASS_CONTENTS_INLINE);
+	m_swapchain.renderPass.begin(m_renderDevice.pMainCommandBuffer, currentImageIndex);
 	imguiDraw->fillCmd(m_renderDevice.pMainCommandBuffer);
 
-	vkCmdEndRenderPass(m_renderDevice.pMainCommandBuffer);
+	m_swapchain.renderPass.end(m_renderDevice.pMainCommandBuffer);
 	vkEndCommandBuffer(m_renderDevice.pMainCommandBuffer);
 
 	auto t = this->get_main_submit_info(1, &m_renderDevice.pMainCommandBuffer);
@@ -636,12 +600,15 @@ void RenderDevice::render2()
 
 	auto sss = vkBeginCommandBuffer(m_renderDevice.pMainCommandBuffer, this->get_main_begin_inf());
 
-	auto inf = this->get_main_renderpass_begin_inf();
-	vkCmdBeginRenderPass(m_renderDevice.pMainCommandBuffer, inf, VK_SUBPASS_CONTENTS_INLINE);
+	m_swapchain.renderPass.begin(m_renderDevice.pMainCommandBuffer, currentImageIndex);
+
+	/*auto inf = this->get_main_renderpass_begin_inf();
+	vkCmdBeginRenderPass(m_renderDevice.pMainCommandBuffer, inf, VK_SUBPASS_CONTENTS_INLINE);*/
 
 	imguiDraw->fillCmd(m_renderDevice.pMainCommandBuffer);
 
-	vkCmdEndRenderPass(m_renderDevice.pMainCommandBuffer);
+	m_swapchain.renderPass.end(m_renderDevice.pMainCommandBuffer);
+	//vkCmdEndRenderPass(m_renderDevice.pMainCommandBuffer);
 	vkEndCommandBuffer(m_renderDevice.pMainCommandBuffer);
 
 
@@ -1090,25 +1057,18 @@ bool RenderDevice::init_vk_swapchain()
 	m_swapchain.frameBuffers.resize(imageCount);
 
 	//create the framebuffers for the swapchain images. This will connect the render-pass to the images for rendering
-	VkFramebufferCreateInfo fb_info = {};
-	fb_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-	fb_info.pNext = nullptr;
-
-	fb_info.renderPass = m_swapchain.renderPass;
-	fb_info.attachmentCount = 1;
-	fb_info.width = m_instance.surfaceExtent.width;
-	fb_info.height = m_instance.surfaceExtent.height;
-	fb_info.layers = 1;
-
-
-	for (uint32_t i = 0; i < imageCount; i++)
+	std::vector<GNF_UVec2> sizes(m_swapchain.swapchainImages.size());
+	for (int i = 0; i < sizes.size(); i++)
 	{
-		fb_info.pAttachments = &(m_swapchain.swapchainImageViews[i]);
-		if (vkCreateFramebuffer(m_renderDevice.logicalDevice, &fb_info, nullptr, &m_swapchain.frameBuffers[i]) != VK_SUCCESS)
-		{
-			return false;
-		}
+		sizes[i].x = m_instance.surfaceExtent.width;
+		sizes[i].y = m_instance.surfaceExtent.height;
 	}
+
+	std::vector<VkClearValue> clearValues;
+	clearValues.push_back({ {0.f,0.f,0.f,0.f} });
+
+	m_swapchain.renderPass.create(m_renderDevice.logicalDevice, m_swapchain.swapchainImageViews, sizes, clearValues, m_instance.format.format,
+		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	return true;
 }
 
@@ -1165,27 +1125,40 @@ bool RenderDevice::validate_swapchain()
 		vkCreateImageView(m_renderDevice.logicalDevice, &info, nullptr, &m_swapchain.swapchainImageViews[i]);
 
 	}
-
-	VkFramebufferCreateInfo fb_info = {};
-	fb_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-	fb_info.pNext = nullptr;
-
-	fb_info.renderPass = m_swapchain.renderPass;
-	fb_info.attachmentCount = 1;
-	fb_info.width = m_instance.surfaceExtent.width;
-	fb_info.height = m_instance.surfaceExtent.height;
-	fb_info.layers = 1;
-
-
-	for (uint32_t i = 0; i < m_swapchain.frameBuffers.size(); i++)
+	m_swapchain.renderPass.destroy(m_renderDevice.logicalDevice);
+	std::vector<GNF_UVec2> sizes(m_swapchain.swapchainImages.size());
+	for (int i = 0; i < sizes.size(); i++)
 	{
-		vkDestroyFramebuffer(m_renderDevice.logicalDevice, m_swapchain.frameBuffers[i], nullptr);
-		fb_info.pAttachments = &(m_swapchain.swapchainImageViews[i]);
-		if (vkCreateFramebuffer(m_renderDevice.logicalDevice, &fb_info, nullptr, &m_swapchain.frameBuffers[i]) != VK_SUCCESS)
-		{
-			return false;
-		}
+		sizes[i].x = m_instance.surfaceExtent.width;
+		sizes[i].y = m_instance.surfaceExtent.height;
 	}
+
+	std::vector<VkClearValue> clearValues;
+	clearValues.push_back({ {0.f,0.f,0.f,0.f} });
+
+	m_swapchain.renderPass.create(m_renderDevice.logicalDevice, m_swapchain.swapchainImageViews,sizes,clearValues, m_instance.format.format,
+		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+	//VkFramebufferCreateInfo fb_info = {};
+	//fb_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	//fb_info.pNext = nullptr;
+
+	//fb_info.renderPass = m_swapchain.renderPass;
+	//fb_info.attachmentCount = 1;
+	//fb_info.width = m_instance.surfaceExtent.width;
+	//fb_info.height = m_instance.surfaceExtent.height;
+	//fb_info.layers = 1;
+
+
+	//for (uint32_t i = 0; i < m_swapchain.frameBuffers.size(); i++)
+	//{
+	//	vkDestroyFramebuffer(m_renderDevice.logicalDevice, m_swapchain.frameBuffers[i], nullptr);
+	//	fb_info.pAttachments = &(m_swapchain.swapchainImageViews[i]);
+	//	if (vkCreateFramebuffer(m_renderDevice.logicalDevice, &fb_info, nullptr, &m_swapchain.frameBuffers[i]) != VK_SUCCESS)
+	//	{
+	//		return false;
+	//	}
+	//}
 
 	swapchain_needs_validate = false;
 	return true;
@@ -1195,55 +1168,56 @@ bool RenderDevice::init_renderpass()
 {
 	// Create Render Pass
 
-// the renderpass will use this color attachment.
-	VkAttachmentDescription color_attachment = {};
-	//the attachment will have the format needed by the swapchain
-	color_attachment.format = m_instance.format.format;
-	//1 sample, we won't be doing MSAA
-	color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	// we Clear when this attachment is loaded
-	color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	// we keep the attachment stored when the renderpass ends
-	color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	//we don't care about stencil
-	color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-	//we don't know or care about the starting layout of the attachment
-	color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-
-	//after the renderpass ends, the image has to be on a layout ready for display
-	color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-
-	VkAttachmentReference color_attachment_ref = {};
-	//attachment number will index into the pAttachments array in the parent renderpass itself
-	color_attachment_ref.attachment = 0;
-	color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	//we are going to create 1 subpass, which is the minimum you can do
-	VkSubpassDescription subpass = {};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &color_attachment_ref;
-
-
-
-	VkRenderPassCreateInfo render_pass_info = {};
-	render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-
-	//connect the color attachment to the info
-	render_pass_info.attachmentCount = 1;
-	render_pass_info.pAttachments = &color_attachment;
-	//connect the subpass to the info
-	render_pass_info.subpassCount = 1;
-	render_pass_info.pSubpasses = &subpass;
-
-
-	if (VK_SUCCESS != vkCreateRenderPass(m_renderDevice.logicalDevice, &render_pass_info, nullptr, &m_swapchain.renderPass))
-	{
-		return false;
-	}
+//// the renderpass will use this color attachment.
+//	VkAttachmentDescription color_attachment = {};
+//	//the attachment will have the format needed by the swapchain
+//	color_attachment.format = m_instance.format.format;
+//	//1 sample, we won't be doing MSAA
+//	color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+//	// we Clear when this attachment is loaded
+//	color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+//	// we keep the attachment stored when the renderpass ends
+//	color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+//	//we don't care about stencil
+//	color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+//	color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+//
+//	//we don't know or care about the starting layout of the attachment
+//	color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+//
+//	//after the renderpass ends, the image has to be on a layout ready for display
+//	color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+//
+//
+//	VkAttachmentReference color_attachment_ref = {};
+//	//attachment number will index into the pAttachments array in the parent renderpass itself
+//	color_attachment_ref.attachment = 0;
+//	color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+//
+//	//we are going to create 1 subpass, which is the minimum you can do
+//	VkSubpassDescription subpass = {};
+//	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+//	subpass.colorAttachmentCount = 1;
+//	subpass.pColorAttachments = &color_attachment_ref;
+//
+//
+//
+//	VkRenderPassCreateInfo render_pass_info = {};
+//	render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+//
+//	//connect the color attachment to the info
+//	render_pass_info.attachmentCount = 1;
+//	render_pass_info.pAttachments = &color_attachment;
+//	//connect the subpass to the info
+//	render_pass_info.subpassCount = 1;
+//	render_pass_info.pSubpasses = &subpass;
+//
+//	m_swapchain.vkRenderPass.create(m_renderDevice.logicalDevice, )
+//
+//	if (VK_SUCCESS != vkCreateRenderPass(m_renderDevice.logicalDevice, &render_pass_info, nullptr, &m_swapchain.renderPass))
+//	{
+//		return false;
+//	}
 
 	return true;
 }
@@ -1289,15 +1263,15 @@ bool RenderDevice::init_vk_syncs()
 VkCommandBuffer RenderDevice::begin_single_time_command()
 {
 
-	vkResetCommandPool(m_renderDevice.logicalDevice, m_renderDevice.mainQueueCommandPools[0], 0);
+	vkResetCommandPool(m_renderDevice.logicalDevice, m_renderDevice.mainQueueCommandPools[1], 0);
 	vkResetFences(m_renderDevice.logicalDevice, 1, &m_renderDevice.presentQueueFinishedFence);
-	vkBeginCommandBuffer(m_renderDevice.pMainCommandBuffer, this->get_main_begin_inf());
-	return m_renderDevice.pMainCommandBuffer;
+	vkBeginCommandBuffer(m_renderDevice.commandBuffers[1][0], this->get_main_begin_inf());
+	return m_renderDevice.commandBuffers[1][0];
 }
 
 void RenderDevice::finish_exec_single_time_command(VkCommandBuffer buff)
 {
-	vkEndCommandBuffer(m_renderDevice.pMainCommandBuffer);
+	vkEndCommandBuffer(buff);
 	VkSubmitInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	info.pNext = nullptr;

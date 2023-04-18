@@ -19,7 +19,7 @@
 #include <vulkan/vulkan.h>
 
 #include <boost/signals2.hpp>
-
+#include "../../graphic/vulkan_renderpass.h"
 #include "../../core/vec2.h"
 #include "../system_manager.h"
 #include "../window_manager.h"
@@ -75,7 +75,9 @@ public:
 
 		VkFramebuffer currentFrameBuffer = nullptr;
 
-		VkRenderPass renderPass = nullptr;
+		//VkRenderPass renderPass = nullptr;
+		VulkanRenderpass renderPass;
+
 	};
 
 	struct VulkanRenderDevice final
@@ -192,6 +194,11 @@ public:
 		return &currentImageIndex;
 	}
 
+	_INLINE_ VulkanSwapChain* get_swapchain()
+	{
+		return &m_swapchain;
+	}
+
 	void swapbuffers();
 	_INLINE_ VkSubmitInfo* get_main_submit_info(uint32_t cmdCount, VkCommandBuffer* buffs)
 	{
@@ -231,7 +238,7 @@ public:
 		return &m_quitting;
 	}
 
-	_INLINE_ VkRenderPassBeginInfo* get_main_renderpass_begin_inf()
+	/*_INLINE_ VkRenderPassBeginInfo* get_main_renderpass_begin_inf()
 	{
 		static VkClearValue clearValue
 		{
@@ -241,7 +248,7 @@ public:
 		static VkRenderPassBeginInfo beginInf{
 			VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 			nullptr,
-			m_swapchain.renderPass,
+			m_swapchain.vkRenderPass.get_handle(),
 			m_swapchain.currentFrameBuffer,
 			{{(int32_t)0,(int32_t)0},{m_instance.surfaceExtent.width,m_instance.surfaceExtent.height}},
 			1,
@@ -253,7 +260,7 @@ public:
 
 		beginInf.framebuffer = m_swapchain.currentFrameBuffer;
 		return &beginInf;
-	}
+	}*/
 	bool init_vk_swapchain();
 
 	void handleError();
