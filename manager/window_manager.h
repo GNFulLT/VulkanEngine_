@@ -98,10 +98,7 @@ public:
 		return glfwWindowShouldClose(m_window);
 	}
 
-	_INLINE_ void handle_window_events()
-	{
-		glfwPollEvents();
-	}
+	void handle_window_events();
 
 	_INLINE_ const GNF_UVec2* get_size_r() const noexcept
 	{

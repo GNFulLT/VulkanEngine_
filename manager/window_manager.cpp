@@ -6,6 +6,8 @@
 #include "rendering/render_device.h"
 #include "logger_manager.h"
 #include "rendering/render_scene.h"
+#include "../main/application.h"
+
 #include <boost/format.hpp>
 
 WindowManager::WindowManager() : m_lastMode(WINDOW_MODE_WINDOWED), m_windowMode(this, WindowManager::WINDOW_MODE_WINDOWED, "WindowMode"), m_size(this, GNF_UVec2{ .x = 640, .y = 480 }, "Size")
@@ -123,6 +125,15 @@ void WindowManager::rebuild_window()
 	ImGui::DockBuilderDockWindow("Content Browser", dock_id_bottom);
 
 	ImGui::DockBuilderFinish(m_dock_id);
+}
+
+void WindowManager::handle_window_events()
+{
+	glfwPollEvents();
+	if (wants_close())
+	{
+		Application::exit();
+	}
 }
 
 void WindowManager::pre_render()
