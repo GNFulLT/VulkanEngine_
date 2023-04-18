@@ -15,7 +15,7 @@ public:
 public:
 	TimerManager() = default;
 
- 	_INLINE_ int calc_fps()
+ 	_INLINE_ bool calc_fps(int& fps)
 	{
 		static int frameCount = 0;
 		frameCount++;
@@ -24,14 +24,20 @@ public:
 			m_frameCountInSecond = frameCount;
 			frameCount = 0;
 			m_lastTime += 1000.f;
-			return m_frameCountInSecond;
+			fps = m_frameCountInSecond;
+			return true;
 		}
-		return -1;
+		return false;
 	}
 
 	_INLINE_ int get_fps() const noexcept
 	{
 		return m_frameCountInSecond;
+	}
+
+	_INLINE_ boost::timer::cpu_times get_cpu_timer_time() const noexcept
+	{
+		return m_timer.elapsed();
 	}
 
 	_INLINE_ double calculate_delta_time()
