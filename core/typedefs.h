@@ -42,9 +42,10 @@
 
 #ifndef _NO_EXCEPT_
 #ifdef _DEBUG
-#define _NO_EXPECT_ 
-#endif // _DEBUG
+#define _NO_EXCEPT_ 
+#else 
 #define _NO_EXCEPT_ noexcept
+#endif // _DEBUG
 #endif // _NOEXCEPT_
 
 // Inform the compiler that the return value of the function is important and shouldn't be ignored
