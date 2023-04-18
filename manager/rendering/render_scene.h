@@ -17,19 +17,28 @@ class RenderScene : public Object
 	OBJECT_DEF(RenderScene,Object)
 public:
 	RenderScene();
-	~RenderScene();
+	virtual ~RenderScene();
 
 	//X Needed
-	bool init(const GNF_UVec2& initial_size);
+	bool init(const GNF_UVec2& initial_size, VulkanRenderpass* renderpass = nullptr);
 	void destroy();
-	void on_resize(const GNF_UVec2& size);
+	void on_resize(const GNF_UVec2& size, VulkanRenderpass* renderpass = nullptr);
 	void render_ex(VkQueue queue,VkCommandBuffer buff, VkFence fence);
-	bool fill_cmd(VkCommandBuffer buff);
+	virtual bool fill_cmd(VkCommandBuffer buff);
 	_F_INLINE_ VkDescriptorSet get_image() const noexcept
 	{
 		return m_descriptor_set;
 	}
+
+	_F_INLINE_ void set_vulkan_renderpass(VulkanRenderpass* vkpass)
+	{
+		m_renderPass = vkpass;
+	}
+
+	void delete_buff();
+	uint8_t* get_image_bytes();
 private:
+	bool m_offScreenRenderingEnabled = true;
 	GNF_UVec2 m_size;
 	VkDevice m_dev;
 	VkPhysicalDevice m_physical_dev;
@@ -42,12 +51,15 @@ private:
 	VkSampler m_image_sampler = nullptr;
 	VkDescriptorSet m_descriptor_set = nullptr;
 
-	VulkanRenderpass m_renderPass;
 
+	VkDeviceMemory m_image_cpu_mem = nullptr;
+	VkBuffer m_image_cpu_buff = nullptr;
+	//X Shoul be const because it is not owner just uses the renderpass. And Offrendering texture creation need to be split
 	// Render Target
 	//VkRenderPass m_render_pass = nullptr;
 	//VkFramebuffer m_frame_buffer = nullptr;
-private:
+protected:
+	VulkanRenderpass* m_renderPass;
 	bool isViewDirty = false;
 	_INLINE_ VkCommandBufferBeginInfo* get_main_begin_inf()
 	{
