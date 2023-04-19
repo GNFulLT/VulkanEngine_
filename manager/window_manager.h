@@ -110,6 +110,12 @@ public:
 		return &m_size;
 	}
 
+	_INLINE_ const ConfigProperty<WINDOW_MODE>* get_window() const noexcept
+	{
+		return &m_windowMode;
+	}
+
+
 	void pre_render();
 	void render();
 	void on_created();

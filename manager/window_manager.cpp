@@ -346,6 +346,14 @@ void WindowManager::on_resize(int width,int height)
 	vec.x = width;
 	vec.y = height;
 	m_size.set(vec);
+	if (width == 0 && height == 0)
+	{
+		m_windowMode.set(WINDOW_MODE_MINIMIZED);
+	}
+	else
+	{
+		m_windowMode.set(WINDOW_MODE_WINDOWED);
+	}
 }
 
 bool WindowManager::need_render()
