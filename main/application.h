@@ -62,12 +62,19 @@ protected:
 	virtual void before_exit_impl() {}
 	virtual void after_frame_impl() {}
 	
+
+	virtual void override_loaders() {};
+
 	virtual void render_scene_impl();
+
 
 	std::function<void()> process_events;
 	std::function<void()> present_image;
 	std::function<void()> set_next_image;
-
+	std::function<bool()> load_window;
+	std::function<bool()> need_handle_for_resize;
+	std::function<void()> handle_resize;
+	std::function<bool()> needed_render;
 	std::mutex m_managerMutex;
 
 	RenderScene* m_renderScene = nullptr;

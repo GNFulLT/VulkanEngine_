@@ -7,8 +7,31 @@
 #include "../manager/resource_manager.h"
 #include "../manager/timer_manager.h"
 #include "../manager/rendering/render_scene_ui.h"
+
+
+bool load_window_impl()
+{
+	auto wndm = MemoryManager::get_singleton()->create_singleton_object<WindowManager>("WindowManager");
+	WindowManager::set_singleton(wndm);
+	bool inited = wndm->init() >= 0;
+	if(inited)
+		wndm->show();
+
+	return inited;
+}
+
+bool needed_render_impl()
+{
+	return WindowManager::get_singleton()->need_render();
+}
+
 int Application::run()
 {
+	load_window = std::bind(&load_window_impl);
+	needed_render = std::bind(&needed_render_impl);
+	//X Override loaders
+	override_loaders();
+
 	auto initCode = before_start();
 
 	if (initCode != 0)
@@ -19,9 +42,8 @@ int Application::run()
 	auto timerManager = TimerManager::get_singleton();
 	m_applicationStartupTime = timerManager->get_cpu_timer_time();
 
-	WindowManager::get_singleton()->show();
 	
-	while (!m_wantsExit && !WindowManager::get_singleton()->wants_close())
+	while (!m_wantsExit)
 	{
 		//X Can handle different thread. Need benchmarks 
 		auto deltaTime = timerManager->calculate_delta_time();
@@ -30,6 +52,8 @@ int Application::run()
 		
 		process_events();
 
+		
+
 		if (inSecond)
 		{
 			fixed_update_impl();
@@ -37,7 +61,7 @@ int Application::run()
 
 		update();
 
-		if (begin_frame())
+		if (needed_render() && begin_frame())
 		{
 			render();
 
@@ -66,9 +90,8 @@ int Application::before_start()
 		return -1;
 	}
 
-	auto wndm = MemoryManager::get_singleton()->create_singleton_object<WindowManager>("WindowManager");
-	WindowManager::set_singleton(wndm);
-	if (wndm->init() >= 0)
+	
+	if (load_window())
 	{
 		m_managerLoads[APPLICATION_MANAGER::APPLICATION_MANAGER_WINDOW_MANAGER].store(true);
 	}
@@ -118,6 +141,8 @@ int Application::before_start()
 	process_events = std::bind(&WindowManager::handle_window_events, WindowManager::get_singleton());
 	present_image = std::bind(&RenderDevice::swapbuffers, RenderDevice::get_singleton());
 	set_next_image = std::bind(&RenderDevice::set_next_image, RenderDevice::get_singleton());
+	handle_resize = std::bind(&RenderDevice::validate_swapchain,RenderDevice::get_singleton());
+	need_handle_for_resize = std::bind(&RenderDevice::does_swapchain_need_validate, RenderDevice::get_singleton());
 	//X TODO : If all managers can be initalized try to initalize application specific init
 	
 	render_scene_impl();
@@ -135,12 +160,29 @@ void Application::update()
 bool Application::begin_frame()
 {
 	RenderDevice::get_singleton()->reset_things();
-	set_next_image();
+	if (need_handle_for_resize())
+	{
+		handle_resize();
+	}
+	RenderDevice::get_singleton()->set_next_image();
 	return begin_frame_impl();
 }
 
 void Application::render()
 {
+	static VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	static 	VkSubmitInfo inf = {
+		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+		.pNext = nullptr,
+		.waitSemaphoreCount = 1,
+		.pWaitSemaphores = &RenderDevice::get_singleton()->get_render_device().imageAcquiredSemaphore,
+		.pWaitDstStageMask = &waitStage,
+		.commandBufferCount = 1,
+		.pCommandBuffers = &RenderDevice::get_singleton()->get_render_device().pSceneCommandBuffer,
+		.signalSemaphoreCount = 1,
+		.pSignalSemaphores = &RenderDevice::get_singleton()->get_render_device().renderCompleteSemaphore,
+	};
+
 	//X CPU Profilers
 
 	//X Custom Render Impl
@@ -151,15 +193,6 @@ void Application::render()
 	m_renderScene->fill_cmd(RenderDevice::get_singleton()->get_render_device().pSceneCommandBuffer);
 
 	//X Submit task
-	VkSubmitInfo inf = {};
-	VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	inf.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	inf.pNext = nullptr;
-	inf.commandBufferCount = 1;
-	inf.pCommandBuffers = &RenderDevice::get_singleton()->get_render_device().pSceneCommandBuffer;
-	inf.signalSemaphoreCount = 1;
-	inf.pSignalSemaphores = &RenderDevice::get_singleton()->get_render_device().renderCompleteSemaphore;
-	inf.pWaitDstStageMask = &waitStage;
 	vkQueueSubmit(RenderDevice::get_singleton()->get_render_device().mainQueue, 1, &inf, RenderDevice::get_singleton()->get_render_device().mainQueueFinishedFence);
 
 	//X Doesn't need this. It will be needed when changing the render flow
@@ -218,4 +251,8 @@ void Application::render_scene_impl()
 {
 	m_renderScene = MemoryManager::get_singleton()->new_object<RenderSceneUI>("RenderSceneUI");
 	m_renderScene->init(*WindowManager::get_singleton()->get_size()->get(), &RenderDevice::get_singleton()->get_swapchain()->renderPass);
+}
+
+void create_window()
+{
 }
