@@ -7,6 +7,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "../rendering/presentation_manager.h"
 
 ImGuiDraw::ImGuiDraw()
 {
@@ -89,7 +90,7 @@ void ImGuiDraw::init()
 	init_info.Allocator = VK_NULL_HANDLE;
 	init_info.CheckVkResultFn = VK_NULL_HANDLE;
 
-	ImGui_ImplVulkan_Init(&init_info, RenderDevice::get_singleton()->m_swapchain.renderPass);
+	ImGui_ImplVulkan_Init(&init_info, PresentationManager::get_singleton()->get_image_as_renderpass()->get_handle());
 	RenderDevice::get_singleton()->reset_cmd_pool(0);
 
 	auto cmd = RenderDevice::get_singleton()->m_renderDevice.pMainCommandBuffer;
