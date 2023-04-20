@@ -84,8 +84,8 @@ void ImGuiDraw::init()
 	init_info.PipelineCache = VK_NULL_HANDLE;
 	init_info.DescriptorPool = imguiPool;
 	init_info.Subpass = 0;
-	init_info.MinImageCount = RenderDevice::get_singleton()->m_instance.surfaceImageCount - 1;
-	init_info.ImageCount = RenderDevice::get_singleton()->m_instance.surfaceImageCount;
+	init_info.MinImageCount = PresentationManager::get_singleton()->get_image_count() - 1;
+	init_info.ImageCount = PresentationManager::get_singleton()->get_image_count();
 	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 	init_info.Allocator = VK_NULL_HANDLE;
 	init_info.CheckVkResultFn = VK_NULL_HANDLE;
