@@ -1,12 +1,13 @@
 #include "render_scene_ui.h"
 #include "render_device.h"
+#include "presentation_ui_manager.h"
 bool RenderSceneUI::fill_cmd(VkCommandBuffer buff)
 {
 
 	auto res = vkBeginCommandBuffer(buff, get_main_begin_inf());
-	m_renderPass->begin(buff,*RenderDevice::get_singleton()->get_current_image());
+	((PresentationUIManager*)PresentationManager::get_singleton())->begin_renderpass(buff);
 
-	m_renderPass->end(buff);
+	((PresentationUIManager*)PresentationManager::get_singleton())->end_renderpass(buff);
 	res = vkEndCommandBuffer(buff);
 
 	return true;
