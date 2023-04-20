@@ -151,7 +151,8 @@ public:
 	void render_scene();
 
 	void set_next_image();
-
+	//X NEED TO BE SERVERD AS EXTENSION
+	void init_imgui();
 	void reset_things();
 
 	void fill_and_execute_cmd();
