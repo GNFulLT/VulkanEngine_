@@ -16,7 +16,6 @@
 #include "render_device.h"
 
 #include "../logger_manager.h"
-#include "../window_manager.h"
 #include "../../core/version.h"
 #include "../../core/utils_vulkan.h"
 #include "../../core/typedefs.h"
@@ -154,15 +153,14 @@ bool RenderDevice::init()
 	succeeded = init_renderpass();
 	if (!succeeded)
 		return false;
-	succeeded = init_vk_swapchain();
-	if (!succeeded)
-		return false;
+	//succeeded = init_vk_swapchain();
+	//if (!succeeded)
+	//	return false;
 	succeeded = init_vk_syncs();
 	if (!succeeded)
 		return false;
 	init_command_buffers();
-	imguiDraw = MemoryManager::get_singleton()->new_object<ImGuiDraw>("ImGuiRenderer");
-	imguiDraw->init();
+	
 
 	//m_renderScene = MemoryManager::get_singleton()->new_object<RenderScene>("SceneRenderer", m_renderDevice.logicalDevice,m_renderDevice.physicalDev.physicalDev);
 
@@ -173,9 +171,13 @@ bool RenderDevice::init()
 //LoggerServer::get_singleton()->log_cout(this,"Couldn't initalize debug mode",Logger::WARNING);
 void RenderDevice::on_size_changed(const GNF_UVec2& size)
 {
-	m_instance.surfaceExtent.height = size.y;
-	m_instance.surfaceExtent.width = size.x;
-	swapchain_needs_validate = true;
+	if (size.x != 0 && size.y != 0)
+	{
+		m_instance.surfaceExtent.height = size.y;
+		m_instance.surfaceExtent.width = size.x;
+		swapchain_needs_validate = true;
+	}
+
 	//init_vk_swapchain();
 
 
@@ -371,10 +373,10 @@ bool RenderDevice::init_vk_instance()
 	}
 
 	//X Create Surface
-	{
+	/*{
 		if (glfwCreateWindowSurface(m_instance.instance, WindowManager::get_singleton()->get_window(), nullptr, &m_instance.surface) != VK_SUCCESS)
 			return false;
-	}
+	}*/
 
 	return true;
 }
@@ -423,6 +425,12 @@ bool RenderDevice::init_command_buffers()
 	return true;
 }
 
+void RenderDevice::init_imgui()
+{
+	imguiDraw = MemoryManager::get_singleton()->new_object<ImGuiDraw>("ImGuiRenderer");
+	imguiDraw->init();
+}
+
 void RenderDevice::reset_things()
 {
 	vkWaitForFences(m_renderDevice.logicalDevice, 1, &m_renderDevice.mainQueueFinishedFence, VK_TRUE, UINT64_MAX);
@@ -447,7 +455,7 @@ void RenderDevice::set_next_image()
 		LoggerManager::get_singleton()->log_cout(this, "IMAGE IS BUGGY", Logger::LOG_LEVEL::ERROR);
 	}
 
-	m_swapchain.currentFrameBuffer = m_swapchain.frameBuffers[currentImageIndex];
+	//m_swapchain.currentFrameBuffer = m_swapchain.frameBuffers[currentImageIndex];
 }
 
 void RenderDevice::beginFrame()
@@ -687,7 +695,8 @@ bool RenderDevice::init_vk_device()
 	// Suface is supported now check its capabilities
 	dev = devs.begin();
 
-	while (dev != devs.end())
+	//X TODO : PRESENTATION 
+	/*while (dev != devs.end())
 	{
 		SwapChainSupportDetails details;
 		bool getDetails = get_swap_chain_support_details(*dev.operator->(), m_instance.surface, details);
@@ -731,7 +740,7 @@ bool RenderDevice::init_vk_device()
 		{
 			dev = devs.erase(dev);
 		}
-	}
+	}*/
 
 	// Surface capabilities is supported. Now check Queue Futures
 
@@ -790,51 +799,52 @@ bool RenderDevice::init_vk_device()
 
 bool RenderDevice::save_vk_physical_device()
 {
-	bool getted = get_swap_chain_support_details(m_renderDevice.physicalDev.physicalDev, m_instance.surface, m_swapChainDetails);
-	if (!getted)
-		return false;
-	m_instance.surfaceImageCount = m_swapChainDetails.capabilities.minImageCount + 1;
+	//X TODO : NEED SEMAPHORE BETWEEN TWO MANAGER
+	//bool getted = get_swap_chain_support_details(m_renderDevice.physicalDev.physicalDev, m_instance.surface, m_swapChainDetails);
+	//if (!getted)
+	//	return false;
+	//m_instance.surfaceImageCount = m_swapChainDetails.capabilities.minImageCount + 1;
 
-	// Extent of scrren
-	if (m_swapChainDetails.capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
-		m_instance.surfaceExtent = m_swapChainDetails.capabilities.currentExtent;
-	}
-	else {
-		int wndSizeX = WindowManager::get_singleton()->get_size_r()->x;
-		int wndSizeY = WindowManager::get_singleton()->get_size_r()->y;
-		VkExtent2D actualExtent = {
-			static_cast<uint32_t>(wndSizeX),
-			static_cast<uint32_t>(wndSizeY)
-		};
+	//// Extent of scrren
+	//if (m_swapChainDetails.capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+	//	m_instance.surfaceExtent = m_swapChainDetails.capabilities.currentExtent;
+	//}
+	//else {
+	//	int wndSizeX = WindowManager::get_singleton()->get_size_r()->x;
+	//	int wndSizeY = WindowManager::get_singleton()->get_size_r()->y;
+	//	VkExtent2D actualExtent = {
+	//		static_cast<uint32_t>(wndSizeX),
+	//		static_cast<uint32_t>(wndSizeY)
+	//	};
 
-		actualExtent.width = std::clamp(actualExtent.width, m_swapChainDetails.capabilities.minImageExtent.width, m_swapChainDetails.capabilities.maxImageExtent.width);
-		actualExtent.height = std::clamp(actualExtent.height, m_swapChainDetails.capabilities.minImageExtent.height, m_swapChainDetails.capabilities.maxImageExtent.height);
+	//	actualExtent.width = std::clamp(actualExtent.width, m_swapChainDetails.capabilities.minImageExtent.width, m_swapChainDetails.capabilities.maxImageExtent.width);
+	//	actualExtent.height = std::clamp(actualExtent.height, m_swapChainDetails.capabilities.minImageExtent.height, m_swapChainDetails.capabilities.maxImageExtent.height);
 
-		m_instance.surfaceExtent = actualExtent;
-	}
+	//	m_instance.surfaceExtent = actualExtent;
+	//}
 
 	vkGetPhysicalDeviceFeatures(m_renderDevice.physicalDev.physicalDev, &(m_renderDevice.physicalDev.physicalDevFeatures));
 
 	vkGetPhysicalDeviceProperties(m_renderDevice.physicalDev.physicalDev, &(m_renderDevice.physicalDev.physicalDevProperties));
 
-	auto queues = get_all_queue_families_by_device(m_renderDevice.physicalDev.physicalDev);
+	//auto queues = get_all_queue_families_by_device(m_renderDevice.physicalDev.physicalDev);
 
-	bool found = false;
-	for (unsigned int i = 0; i < queues.size(); i++)
-	{
-		VkBool32 supportSurface;
-		vkGetPhysicalDeviceSurfaceSupportKHR(m_renderDevice.physicalDev.physicalDev, i, m_instance.surface, &supportSurface);
-		if (supportSurface == VK_TRUE)
-		{
-			if (i == m_renderDevice.mainQueueFamilyIndex)
-			{
-				found = true;
-				break;
-			}
-		}
-	}
+	//bool found = false;
+	//for (unsigned int i = 0; i < queues.size(); i++)
+	//{
+	//	VkBool32 supportSurface;
+	//	vkGetPhysicalDeviceSurfaceSupportKHR(m_renderDevice.physicalDev.physicalDev, i, m_instance.surface, &supportSurface);
+	//	if (supportSurface == VK_TRUE)
+	//	{
+	//		if (i == m_renderDevice.mainQueueFamilyIndex)
+	//		{
+	//			found = true;
+	//			break;
+	//		}
+	//	}
+	//}
 
-	return found;
+	return true;
 }
 
 
