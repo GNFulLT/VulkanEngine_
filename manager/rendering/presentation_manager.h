@@ -26,6 +26,8 @@ public:
 
 	//X Calls before init
 	virtual bool check_device(VkPhysicalDevice dev) = 0;
+
+	virtual uint32_t get_image_count() const noexcept = 0;
 private:
 };
 

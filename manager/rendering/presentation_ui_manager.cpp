@@ -271,3 +271,8 @@ bool PresentationUIManager::create_surface()
 		return false;
 	return true;
 }
+
+uint32_t PresentationUIManager::get_image_count() const noexcept
+{
+	return m_imageCount;
+}

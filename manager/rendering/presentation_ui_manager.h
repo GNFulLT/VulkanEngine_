@@ -55,6 +55,8 @@ public:
 		return m_renderPass.begin(buff,m_swapchain.currentImage);
 	}
 
+	uint32_t get_image_count() const noexcept override;
+
 	_F_INLINE_ void end_renderpass(VkCommandBuffer buff) _NO_EXCEPT_
 	{
 		return m_renderPass.end(buff);
