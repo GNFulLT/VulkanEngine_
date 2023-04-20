@@ -147,71 +147,71 @@ bool RenderScene::init(const GNF_UVec2& initial_size, VulkanRenderpass* renderpa
 		return false;
 
 	m_size = initial_size;
-
+	assert(false);
 	// If therre is no given renderpass
 	// Do offrender
-	if (renderpass == nullptr)
-	{
-		m_renderPass = MemoryManager::get_singleton()->fnew<VulkanRenderpass>();
-		if (!create_image(m_dev, m_physical_dev, initial_size.x, initial_size.y, RenderDevice::get_singleton()->get_instance().format.format,
-			VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_image, m_image_memory))
-		{
-			return false;
-		}
+	//if (renderpass == nullptr)
+	//{
+	//	m_renderPass = MemoryManager::get_singleton()->fnew<VulkanRenderpass>();
+	//	if (!create_image(m_dev, m_physical_dev, initial_size.x, initial_size.y, RenderDevice::get_singleton()->get_instance().format.format,
+	//		VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+	//		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_image, m_image_memory))
+	//	{
+	//		return false;
+	//	}
 
 
-		if (!create_image_view(m_dev, m_image, RenderDevice::get_singleton()->get_instance().format.format, VK_IMAGE_ASPECT_COLOR_BIT, &m_image_view, VK_IMAGE_VIEW_TYPE_2D, 1, 1))
-		{
-			return false;
-		}
-		std::vector<VkClearValue> clearValues;
-		clearValues.push_back({ {0.f,1.f,0.f,1.f} });
+	//	if (!create_image_view(m_dev, m_image, RenderDevice::get_singleton()->get_instance().format.format, VK_IMAGE_ASPECT_COLOR_BIT, &m_image_view, VK_IMAGE_VIEW_TYPE_2D, 1, 1))
+	//	{
+	//		return false;
+	//	}
+	//	std::vector<VkClearValue> clearValues;
+	//	clearValues.push_back({ {0.f,1.f,0.f,1.f} });
 
-		m_renderPass->create(m_dev, m_image_view, m_size.x, m_size.y, clearValues, RenderDevice::get_singleton()->get_instance().format.format,
-			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	//	m_renderPass->create(m_dev, m_image_view, m_size.x, m_size.y, clearValues, RenderDevice::get_singleton()->get_instance().format.format,
+	//		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-		if (m_renderPass->is_failed())
-		{
-			return false;
-		}
+	//	if (m_renderPass->is_failed())
+	//	{
+	//		return false;
+	//	}
 
-		VkSamplerCreateInfo samplerInfo{};
-		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter = VK_FILTER_LINEAR;
-		samplerInfo.minFilter = VK_FILTER_LINEAR;
-		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.anisotropyEnable = VK_TRUE;
-
-
-		VkPhysicalDeviceProperties properties{};
-		vkGetPhysicalDeviceProperties(m_physical_dev, &properties);
-
-		samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-		samplerInfo.unnormalizedCoordinates = VK_FALSE;
-		samplerInfo.compareEnable = VK_FALSE;
-		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-		samplerInfo.mipLodBias = 0.0f;
-		samplerInfo.minLod = 0.0f;
-		samplerInfo.maxLod = 0.0f;
-		if (vkCreateSampler(m_dev, &samplerInfo, nullptr, &m_image_sampler) != VK_SUCCESS) {
-			return false;
-		}
+	//	VkSamplerCreateInfo samplerInfo{};
+	//	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	//	samplerInfo.magFilter = VK_FILTER_LINEAR;
+	//	samplerInfo.minFilter = VK_FILTER_LINEAR;
+	//	samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	//	samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	//	samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	//	samplerInfo.anisotropyEnable = VK_TRUE;
 
 
-		m_descriptor_set = ImGui_ImplVulkan_AddTexture(m_image_sampler, m_image_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	}
-	else
-	{
-		//X If there is given renderpass. Just use it
+	//	VkPhysicalDeviceProperties properties{};
+	//	vkGetPhysicalDeviceProperties(m_physical_dev, &properties);
 
-		m_renderPass = renderpass;
-	}
-			
+	//	samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+	//	samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+	//	samplerInfo.unnormalizedCoordinates = VK_FALSE;
+	//	samplerInfo.compareEnable = VK_FALSE;
+	//	samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+	//	samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	//	samplerInfo.mipLodBias = 0.0f;
+	//	samplerInfo.minLod = 0.0f;
+	//	samplerInfo.maxLod = 0.0f;
+	//	if (vkCreateSampler(m_dev, &samplerInfo, nullptr, &m_image_sampler) != VK_SUCCESS) {
+	//		return false;
+	//	}
+
+
+	//	m_descriptor_set = ImGui_ImplVulkan_AddTexture(m_image_sampler, m_image_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//}
+	//else
+	//{
+	//	//X If there is given renderpass. Just use it
+
+	//	m_renderPass = renderpass;
+	//}
+	//		
 	return true;
 
 }
