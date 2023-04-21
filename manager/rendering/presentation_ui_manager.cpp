@@ -267,7 +267,7 @@ void PresentationUIManager::on_window_resize(const GNF_UVec2& size)
 }
 bool PresentationUIManager::create_surface()
 {
-	if (glfwCreateWindowSurface(RenderDevice::get_singleton()->get_instance().instance, WindowManager::get_singleton()->get_window(), nullptr, &m_surface) != VK_SUCCESS)
+	if (glfwCreateWindowSurface(RenderDevice::get_singleton()->get_instance().instance, (GLFWwindow*)WindowManager::get_singleton()->get_handle(), nullptr, &m_surface) != VK_SUCCESS)
 		return false;
 	return true;
 }

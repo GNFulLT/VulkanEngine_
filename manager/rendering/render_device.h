@@ -100,10 +100,6 @@ public:
 	bool init() override;
 
 	void beginFrame();
-
-	void on_created();
-
-	void pre_render();
 	
 	void render_ui(tf::Subflow& subflow);
 
@@ -118,13 +114,9 @@ public:
 
 	void beginFrameW();
 
-	void ready_ui_data();
-
-	//X TODO : Should take Scene class
-	void render_scene();
-
 	//X NEED TO BE SERVERD AS EXTENSION
 	void init_imgui();
+
 	void reset_things();
 
 	bool render_things(tf::Subflow& subflow);

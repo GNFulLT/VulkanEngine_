@@ -73,7 +73,7 @@ void ImGuiDraw::init()
 	style.WindowRounding = 0;
 	style.WindowMenuButtonPosition = ImGuiDir_::ImGuiDir_None;
 
-	auto r = ImGui_ImplGlfw_InitForVulkan((WindowManager::get_singleton())->get_window(), true);
+	auto r = ImGui_ImplGlfw_InitForVulkan(((GLFWwindow*)WindowManager::get_singleton()->get_handle()), true);
 
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = RenderDevice::get_singleton()->m_instance.instance;

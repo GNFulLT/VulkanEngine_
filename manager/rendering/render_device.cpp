@@ -24,7 +24,6 @@
 #include "../../imgui/imgui.h"
 #include "../../imgui/imgui_impl_glfw.h"
 #include "../../imgui/imgui_impl_vulkan.h"
-#include "../../gui/windows/scene_window.h"
 #include <cmath>
 #include <boost/bind/bind.hpp>
 
@@ -339,13 +338,6 @@ bool RenderDevice::init_vk_instance()
 	return true;
 }
 
-void RenderDevice::ready_ui_data()
-{
-
-	WindowManager::get_singleton()->render();
-	imguiDraw->end();
-}
-
 bool RenderDevice::init_command_buffers()
 {
 
@@ -444,30 +436,6 @@ void RenderDevice::beginFrame()
 
 }
 
-void RenderDevice::on_created()
-{
-	//X TODO : Calculate to size of the Window that will present the RenderDevice
-	ImGui_ImplGlfw_NewFrame();
-	ImGui_ImplVulkan_NewFrame();
-	ImGui::NewFrame();
-
-	WindowManager::get_singleton()->on_created();
-
-	ImGui::EndFrame();
-
-	// In here give it to RenderDevice
-	// For now it is same size with swapchain
-	vkResetCommandPool(m_renderDevice.logicalDevice, m_renderDevice.mainQueueCommandPools[0], 0);
-}
-
-void RenderDevice::pre_render()
-{
-	
-	WindowManager::get_singleton()->pre_render();
-
-	ImGui::EndFrame();
-}
-
 bool RenderDevice::render_things(tf::Subflow& subflow)
 {
 	return true;
@@ -479,24 +447,24 @@ void RenderDevice::beginFrameW()
 	ImGui_ImplGlfw_NewFrame();
 }
 
-void RenderDevice::render_scene()
-{
-	m_renderScene = WindowManager::get_singleton()->need_render("Scene");
-	if (m_renderScene)
-	{
-		((SceneWindow*)WindowManager::get_singleton()->get_registered_window("Scene"))->get_render_scene()->fill_cmd(m_renderDevice.pSceneCommandBuffer);
-		VkSubmitInfo inf = {};
-		VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		inf.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		inf.pNext = nullptr;
-		inf.commandBufferCount = 1;
-		inf.pCommandBuffers = &m_renderDevice.pSceneCommandBuffer;
-		inf.signalSemaphoreCount = 1;
-		inf.pSignalSemaphores = &m_renderDevice.renderSceneCompleteSemaphore;
-		inf.pWaitDstStageMask = &waitStage;
-		vkQueueSubmit(m_renderDevice.mainQueue, 1, &inf, nullptr);
-	}
-}
+//void RenderDevice::render_scene()
+//{
+//	m_renderScene = WindowManager::get_singleton()->need_render("Scene");
+//	if (m_renderScene)
+//	{
+//		((SceneWindow*)WindowManager::get_singleton()->get_registered_window("Scene"))->get_render_scene()->fill_cmd(m_renderDevice.pSceneCommandBuffer);
+//		VkSubmitInfo inf = {};
+//		VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+//		inf.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+//		inf.pNext = nullptr;
+//		inf.commandBufferCount = 1;
+//		inf.pCommandBuffers = &m_renderDevice.pSceneCommandBuffer;
+//		inf.signalSemaphoreCount = 1;
+//		inf.pSignalSemaphores = &m_renderDevice.renderSceneCompleteSemaphore;
+//		inf.pWaitDstStageMask = &waitStage;
+//		vkQueueSubmit(m_renderDevice.mainQueue, 1, &inf, nullptr);
+//	}
+//}
 void RenderDevice::handleError()
 {
 	m_canContinue = false;
