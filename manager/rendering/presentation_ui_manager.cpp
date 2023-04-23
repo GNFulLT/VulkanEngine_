@@ -3,7 +3,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include "../window_manager.h"
+#include "../glfw_window.h"
 #include "../logger_manager.h"
 #include <vulkan/vulkan.h>
 
