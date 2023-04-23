@@ -16,9 +16,10 @@ class WindowManager : public SystemManager
 	SINGLETON(WindowManager)
 	OBJECT_DEF(WindowManager, SystemManager)
 public:
-	WindowManager();
-	bool layout_changed = false;
-	void destroy() override;
+	virtual ~WindowManager() = default;
+	WindowManager() = default;
+
+	virtual void destroy() = 0;
 	enum WINDOW_MODE
 	{
 		WINDOW_MODE_WINDOWED = 0,
@@ -27,49 +28,25 @@ public:
 		WINDOW_MODE_FULLSCREEN
 	};
 
-	virtual bool init() override;
+	virtual bool init() = 0;
 
-	bool need_render();
+	virtual bool need_render() = 0;
 
-	virtual void* get_handle();
+	virtual void* get_handle() = 0;
+	
+	virtual void show() = 0;
 	
 
-	void on_resize(int width, int height);
-	void on_iconify_changed(int iconified);
-	
-	
-	_INLINE_ bool need_validation() const noexcept
-	{
-		return m_needValidation;
-	}
-
-	virtual void show();
-	
-
-	virtual bool wants_close();
+	virtual bool wants_close() = 0;
 
 
-	virtual void handle_window_events();
-
-	virtual const GNF_UVec2* get_size_r() const noexcept;
+	virtual void handle_window_events() = 0;
 
 
-	virtual const ConfigProperty<GNF_UVec2>* get_size() const noexcept;
+	virtual const GNF_UVec2* get_size_r() const noexcept = 0;
 
 
-	_INLINE_ const ConfigProperty<WINDOW_MODE>* get_window() const noexcept
-	{
-		return &m_windowMode;
-	}
-
-private:
-	GLFWwindow* m_window = nullptr;
-	GLFWmonitor* m_monitor = nullptr;
-private:
-	ConfigProperty<GNF_UVec2> m_size;
-	ConfigProperty<WINDOW_MODE> m_windowMode;
-	WINDOW_MODE m_lastMode;
-	bool m_needValidation = false;
+	virtual const ConfigProperty<GNF_UVec2>* get_size() const noexcept = 0;
 };
 
 
