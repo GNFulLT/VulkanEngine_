@@ -24,6 +24,10 @@ public:
 
 	virtual bool does_need_handle_resize() = 0;
 
+	virtual void begin_renderpass(VkCommandBuffer buff) = 0;
+	virtual void end_renderpass(VkCommandBuffer buff) = 0;
+
+
 	//X Calls before init
 	virtual bool check_device(VkPhysicalDevice dev) = 0;
 

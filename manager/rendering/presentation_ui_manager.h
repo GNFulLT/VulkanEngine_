@@ -50,17 +50,12 @@ public:
 		return m_swapchain.currentImage;
 	}
 
-	_F_INLINE_ void begin_renderpass(VkCommandBuffer buff) _NO_EXCEPT_
-	{
-		return m_renderPass.begin(buff,m_swapchain.currentImage);
-	}
+	virtual void begin_renderpass(VkCommandBuffer buff) override;
 
 	uint32_t get_image_count() const noexcept override;
 
-	_F_INLINE_ void end_renderpass(VkCommandBuffer buff) _NO_EXCEPT_
-	{
-		return m_renderPass.end(buff);
-	}
+	virtual void end_renderpass(VkCommandBuffer buff) override;
+	
 
 
 protected:

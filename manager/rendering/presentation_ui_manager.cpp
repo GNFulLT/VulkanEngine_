@@ -272,7 +272,17 @@ bool PresentationUIManager::create_surface()
 	return true;
 }
 
+void PresentationUIManager::begin_renderpass(VkCommandBuffer buff)
+{
+	return m_renderPass.begin(buff, m_swapchain.currentImage);
+}
+
 uint32_t PresentationUIManager::get_image_count() const noexcept
 {
 	return m_imageCount;
+}
+
+void PresentationUIManager::end_renderpass(VkCommandBuffer buff)
+{
+	return m_renderPass.end(buff);
 }
