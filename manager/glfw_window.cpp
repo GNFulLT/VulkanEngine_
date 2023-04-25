@@ -73,6 +73,8 @@ bool GlfwWindowManager::init()
 	glfwSetWindowIconifyCallback(m_window, iconifyCallback);
 	glfwSetWindowSizeCallback(m_window, resizeCallback);
 
+
+
 	return true;
 }
 
@@ -135,6 +137,7 @@ void GlfwWindowManager::show()
 	
 	assert(m_window != nullptr);
 
+	Application::add_wait_semaphore(RenderDevice::get_singleton()->get_render_device().imageAcquiredSemaphore);
 
 	glfwShowWindow(m_window);
 	
