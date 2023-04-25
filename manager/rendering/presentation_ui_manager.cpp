@@ -10,7 +10,7 @@
 #include <boost/algorithm/clamp.hpp>
 
 #include "render_device.h"
-
+#include "../../main/application.h"
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
 #include <glfw/glfw3.h>
@@ -133,6 +133,8 @@ bool PresentationUIManager::init()
 
 	m_renderPass.create(RenderDevice::get_singleton()->get_render_device().logicalDevice, m_swapchain.swapchainImageViews, sizes, clearValues, this->m_surfaceFormat.format,
 		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+	Application::add_signal_semaphore(RenderDevice::get_singleton()->get_render_device().renderCompleteSemaphore);
 	return true;
 
 }
