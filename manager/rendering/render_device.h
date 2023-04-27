@@ -25,7 +25,6 @@
 #include "../window_manager.h"
 
 class CreationServer;
-class ImGuiDraw;
 
 class RenderDevice : public SystemManager
 {
@@ -101,8 +100,6 @@ public:
 
 	void beginFrame();
 	
-	void render_ui(tf::Subflow& subflow);
-
 	VkCommandBuffer begin_single_time_command();
 
 	void finish_exec_single_time_command(VkCommandBuffer buff);
@@ -113,9 +110,6 @@ public:
 	}
 
 	void beginFrameW();
-
-	//X NEED TO BE SERVERD AS EXTENSION
-	void init_imgui();
 
 	void reset_things();
 
@@ -196,7 +190,6 @@ public:
 
 
 	void handleError();
-	void fillCmd(VkCommandBuffer buff);
 private:
 	bool swapchain_needs_validate = false;
 
@@ -223,8 +216,6 @@ private:
 		vkResetCommandPool(m_renderDevice.logicalDevice, m_renderDevice.mainQueueCommandPools[index], 0);
 	}
 
-
-	ImGuiDraw* imguiDraw;
 	bool m_canContinue = true;
 	bool m_renderScene = true;
 	ConfigProperty<bool> m_quitting;

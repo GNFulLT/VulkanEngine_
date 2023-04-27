@@ -19,7 +19,6 @@
 #include "../../core/version.h"
 #include "../../core/utils_vulkan.h"
 #include "../../core/typedefs.h"
-#include "render_imgui.h"
 
 #include "../../imgui/imgui.h"
 #include "../../imgui/imgui_impl_glfw.h"
@@ -70,7 +69,6 @@ RenderDevice::~RenderDevice()
 	if (m_instanceLoaded && m_instance.instance != nullptr)
 	{
 		m_quitting.set(true);
-		MemoryManager::get_singleton()->destroy_object(imguiDraw);
 
 		vkDestroyFence(m_renderDevice.logicalDevice, m_renderDevice.mainQueueFinishedFence, nullptr);
 		vkDestroyFence(m_renderDevice.logicalDevice, m_renderDevice.presentQueueFinishedFence, nullptr);
@@ -375,11 +373,11 @@ bool RenderDevice::init_command_buffers()
 	return true;
 }
 
-void RenderDevice::init_imgui()
-{
-	imguiDraw = MemoryManager::get_singleton()->new_object<ImGuiDraw>("ImGuiRenderer");
-	imguiDraw->init();
-}
+//void RenderDevice::init_imgui()
+//{
+//	imguiDraw = MemoryManager::get_singleton()->new_object<ImGuiDraw>("ImGuiRenderer");
+//	imguiDraw->init();
+//}
 
 void RenderDevice::reset_things()
 {
@@ -468,19 +466,6 @@ void RenderDevice::beginFrameW()
 void RenderDevice::handleError()
 {
 	m_canContinue = false;
-}
-
-void RenderDevice::fillCmd(VkCommandBuffer buff)
-{
-	imguiDraw->fillCmd(buff);
-}
-void RenderDevice::render_ui(tf::Subflow& subflow)
-{
-	auto task = subflow.emplace([imguiDraw = imguiDraw]() {imguiDraw->show_demo(); });
-
-#ifdef _DEBUG
-	task.name("ImGui Draw Fill");
-#endif
 }
 
 bool RenderDevice::init_vk_device()

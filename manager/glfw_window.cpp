@@ -73,7 +73,7 @@ bool GlfwWindowManager::init()
 	glfwSetWindowIconifyCallback(m_window, iconifyCallback);
 	glfwSetWindowSizeCallback(m_window, resizeCallback);
 
-
+	//RenderDevice::get_singleton()->init_imgui();
 
 	return true;
 }
